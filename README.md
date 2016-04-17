@@ -9,9 +9,16 @@ Discord chatbot for rolling dice &amp; flipping coins. Also some other features 
 4. Join the channels you want to use the bot on.
 5. Fill out 'email' and 'password' in authExample.json.
 6. Rename it to auth.json.
-7. Run in command line `node RobotOtter.js` while in the installation folder. (You can also just put a .bat file with `node RobotOtter.js` in the same folder if you're lazy.)
+7. Run in command line `node RobotOtter.js` while in the installation folder. (Or just run RunRobotOtter.bat).
 
 If that doesn't work it's probably my fault.
+
+# Settings
+
+## "subreddit"
+`Default: false`
+
+You probably don't need to change this unless you want to use !wiki for some reason.
 
 # Commands
 
@@ -52,6 +59,8 @@ Flips a coin.
     {T} + {H} = [H = 1] : [T = 1]
 
 ## !wiki [page]
+*Subreddit mode only*
+
 Shows the wiki or a page on the wiki.
 
 [page]: Page name to show:
