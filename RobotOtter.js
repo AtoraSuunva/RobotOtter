@@ -10,7 +10,7 @@ var diceRegex = /(\d+)?d(\d+)([-+*/])?(\d+)?d?(\d+)?/; //get numbers from dice s
 
 var robotOtter = new Discord.Client();
 
-robotOtter.on('message', function (message) {
+robotOtter.on('message', function (message) { //switch is for the weak
     if (message.content.beginsWith('!help')) {
         help(message, message.content);
     }
@@ -21,6 +21,10 @@ robotOtter.on('message', function (message) {
 
     if (message.content.beginsWith('!flip')) {
         flip(message, message.content);
+    }
+    
+    if (message.content.beginsWith('!choose')) {
+        choose(message, message.content);
     }
 
     if (message.content.beginsWith('!wiki')) {
@@ -190,6 +194,16 @@ function flip(message, msgTxt) {
 
     robotOtter.reply(message, coinString);
     console.log('-----');
+}
+
+function choose(message, msgText) {
+  console.log('!choose')
+  var choices = msgText.replace(/(\s*,\s*)/g, ',').substring(8).split(',');
+  robotOtter.reply(message, choices[Math.floor(Math.random()*choices.length)]); 
+  //Sometimes you need to be concise
+  //Because nobody else will see your code :(
+  //But maybe that's a good thing :)
+  console.log('-----')
 }
 
 function wiki(message, msgText) {
