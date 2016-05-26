@@ -54,7 +54,10 @@ function help(message, msgTxt) {
                        '\n' + '{times}: Number of coin flips (max. 10)' +
                        '\n' + 'Example: !coin 2 => {T} + {H} = [H = 1] : [T = 1]';
             break;
-
+        
+        case 'choose':
+            helpText = '\n' + 'I\'ll add this eventually';
+        
         case 'wiki':
             helpText = '\n' + 'Formatting: !wiki [page] ' +
                        '\n' + '[page]: Page name to show: ' +
