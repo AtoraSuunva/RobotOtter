@@ -1,5 +1,6 @@
-var Discord = require('discord.js');
-var Auth = require('./auth.json');
+var Discord = require('discord.js'); //Handles the API
+var Auth = require('./auth.json'); //Auth details
+var fs = require('fs'); //rw functionality
 
 //Variables!
 var helpRegex = /!help (\w+)/; //get command name
@@ -279,12 +280,20 @@ function parseEquation(num1, symbol, num2) { //Does 'num1 symbol num2': prsEqtn(
 }
 
 if (Auth.token !== '') {
-    robotOtter.loginWithToken(Auth.token);
+  console.log('Logged in with token!');
+  robotOtter.loginWithToken(Auth.token);
 }else if (Auth.email !== '' && Auth.password !== '') {
-    robotOtter.login(Auth.email, Auth.password, function (error, token) {
-        console.log(error);
-        Auth.token = token;
+  robotOtter.login(Auth.email, Auth.password, function (error, token) {
+    console.log('Logged in with email + pass!');
+    Auth.token = token;
+    fs.writeFile('./auth.json', JSON.stringify(Auth, null, 4), function(err) {
+      if(err) {
+        console.log(err + ' - Error while saving token');
+      } else {
+        console.log('Token saved');
+      }
     });
+  });
 } else {
     console.log('No authentication details found!');
 }
