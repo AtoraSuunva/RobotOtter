@@ -76,7 +76,7 @@ function help(message, msgTxt) {
             helpText = '\n' + '!help [command] - Brings this help menu or help for a specific command.' +
                        '\n' + '!roll {times}d{dice} - Flips a coin {# of flips} times.' +
                        '\n' + '!flip {times} - Filps a coin {# of flips} times.' +
-                       '\n' + '!choose {item1, item2,... itemN} - Chooses an item from a list.'
+                       '\n' + '!choose {item1, item2,... itemN} - Chooses an item from a list.' +
                        '\n' + '!wiki [page] - Link to the OtterDnD wiki, or link directly to [page] (ie. location, players).' +
                        '\n' + '{Required} - [Optional]';
     }
