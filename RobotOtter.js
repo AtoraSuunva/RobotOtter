@@ -206,7 +206,7 @@ function choose(message, msgText) {
   console.log('!choose')
   var choices = msgText.replace(/(\s*,\s*)/g, ',').substring(8).split(','); //.filter() ;^)
   choices = choices.filter(function(e) {return e !== '';}); //clear empty values (be glad it's not a one-liner)
-  if (choices[0] !== undefined && choices.length > 1 {
+  if (choices[0] !== undefined && choices.length > 1) {
     robotOtter.reply(message, '-> ' + choices[Math.floor(Math.random()*choices.length)]); 
   } else if (choices[0] !== undefined {
     robotOtter.reply(message, '-> Really?');
