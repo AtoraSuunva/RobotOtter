@@ -58,6 +58,15 @@ Flips a coin.
 
     {T} + {H} = [H = 1] : [T = 1]
 
+## !choose {item1, item2, ...itemN}
+Chooses an item from a comma-delimited list of them.
+
+{itemN}: Anything you want, as long as it doesn't have a `,`
+
+*Example: !choose hello, world,localhost:8080 =>*
+
+    -> world
+
 ## !wiki [page]
 *Subreddit mode only*
 
