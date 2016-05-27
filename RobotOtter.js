@@ -56,7 +56,9 @@ function help(message, msgTxt) {
             break;
         
         case 'choose':
-            helpText = '\n' + 'I\'ll add this eventually';
+            helpText = '\n' + 'Formatting: !choose {item1, item2,... itemN}' +
+                       '\n' + '{itemN}: Items to select from' +
+                       '\n' + 'Example: !choose yes, no => -> yes';
         
         case 'wiki':
             helpText = '\n' + 'Formatting: !wiki [page] ' +
@@ -73,6 +75,7 @@ function help(message, msgTxt) {
             helpText = '\n' + '!help [command] - Brings this help menu or help for a specific command.' +
                        '\n' + '!roll {times}d{dice} - Flips a coin {# of flips} times.' +
                        '\n' + '!flip {times} - Filps a coin {# of flips} times.' +
+                       '\n' + '!choose {item1, item2,... itemN} - Chooses an item from a list.'
                        '\n' + '!wiki [page] - Link to the OtterDnD wiki, or link directly to [page] (ie. location, players).' +
                        '\n' + '{Required} - [Optional]';
     }
@@ -201,8 +204,15 @@ function flip(message, msgTxt) {
 
 function choose(message, msgText) {
   console.log('!choose')
-  var choices = msgText.replace(/(\s*,\s*)/g, ',').substring(8).split(',');
-  robotOtter.reply(message, choices[Math.floor(Math.random()*choices.length)]); 
+  var choices = msgText.replace(/(\s*,\s*)/g, ',').substring(8).split(','); //.filter() ;^)
+  choices = choices.filter(function(e) {return e !== '';}); //clear empty values (be glad it's not a one-liner)
+  if (choices[0] !== undefined && choices.length > 1 {
+    robotOtter.reply(message, '-> ' + choices[Math.floor(Math.random()*choices.length)]); 
+  } else if (choices[0] !== undefined {
+    robotOtter.reply(message, '-> Really?');
+  } else{
+    robotOtter.reply(message, '-> Nothing, you gave me no choice. What did you expect?');
+  }
   //Sometimes you need to be concise
   //Because nobody else will see your code :(
   //But maybe that's a good thing :)
