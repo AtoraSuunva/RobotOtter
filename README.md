@@ -1,6 +1,10 @@
 # RobotOtter
 Discord chatbot for rolling dice &amp; flipping coins. Also some other features for /r/OtterDnD
 
+# Preview
+
+Test it on Discord [here](https://discord.gg/0w6AYrrMIUfO71oV)!
+
 # How to use
 0. Install [Node.js](https://nodejs.org/en/download/)
 1. Install [discord.js](http://discordjs.readthedocs.org/en/latest/installing.html).
