@@ -13,13 +13,6 @@ Discord chatbot for rolling dice &amp; flipping coins. Also some other features 
 
 If that doesn't work it's probably my fault.
 
-# Settings
-
-## "subreddit"
-`Default: false`
-
-You probably don't need to change this unless you want to use !wiki for some reason.
-
 # Commands
 
 Arguments between **{Curly Braces}** are **required**, while those between [Brackets] are optional.
@@ -87,6 +80,40 @@ Brings a help menu or help for a specific command.
     Formatting: !flip {times} 
     {times}: Number of coin flips (max. 10)
     Example: !flip 2 => {T} + {H} = [H = 1] : [T = 1]
+
+# Settings
+
+## "maxDiceTimes"
+`Default: 10`
+
+The max amount of times you can roll a dice in one command.
+High values such as 100000 **will** cause RobotOtter to stop responding while it rolls 100000 dice (Trust me).
+
+## "maxDiceSides"
+`Default: 256`
+
+The maximum amount of sides a die can have.
+
+## "maxModifier"
+`Default: 1000`
+
+The maximum number you can modify (add, substract, multiply, divide) by.
+
+## "maxCoinFlips"
+`Default: 10`
+
+Maximum amount of times you can flip a coin in one command.
+Probably has the same problem as `!roll` where *really* high values cause it to stop responding.
+
+## "subreddit"
+`Default: false`
+
+You probably don't need to change this unless you want to use !wiki for some reason.
+
+## "wew"
+`Default: false`
+
+wew lad
 
 ## License
 i dunno i have no idea what each license does so i'll just leave this with no license.

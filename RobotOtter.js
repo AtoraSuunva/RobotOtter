@@ -161,8 +161,8 @@ function roll(message, msgTxt) {
         diceString += '= (' + diceTotal + ') ' + symbol + ' [';
 
         if (times2 !== '' && diceSides2 === '') {
-            if (times2 > maxDiceTimes || diceSides2 > maxDiceSides) {
-                robotOtter.reply(message, 'Roll Invalid! Max {Modifier} is ' + max + '.');
+            if (times2 > maxModifier) {
+                robotOtter.reply(message, 'Roll Invalid! Max {Modifier} is ' + maxModifier + '.');
                 return;
             }
             diceTotal = parseEquation(diceTotal, symbol, times2);
