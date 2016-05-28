@@ -1,0 +1,8 @@
+{
+  "subreddit"   : false,
+  "wew"         : true,
+  "maxDiceTimes": 10,
+  "maxDiceSides": 256,
+  "maxModifier" : 1000,
+  "maxCoinFlips": 10
+}
