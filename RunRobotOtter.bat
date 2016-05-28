@@ -1,2 +1,0 @@
-node RobotOtter.js
-PAUSE
