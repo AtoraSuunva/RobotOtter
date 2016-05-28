@@ -1,5 +1,7 @@
-var Discord = require('discord.js');
-var Auth = require('./auth.json');
+var Discord = require('discord.js'); //Handles the API
+var Auth = require('./auth.json'); //Auth details
+var Settings = require('./settings.json'); //i have no idea
+var fs = require('fs'); //rw functionality
 
 //Variables!
 var helpRegex = /!help (\w+)/; //get command name
@@ -7,6 +9,26 @@ var wikiRegex = /!wiki (\w+)/; //get page name
 var numberRegex = /(\d+)/;     //get number
 var diceRegex = /(\d+)?d(\d+)([-+*/])?(\d+)?d?(\d+)?/; //get numbers from dice string 1d3+5d6 => ['1d3+5d6', '1', '3', '+', '5', '6']
                                                          //                           4d5     => ['4d5'    , '4', '5', undefined, undefined, undefined]
+var maxDiceTimes = ((Number.isSafeInteger(Settings.maxDiceTimes)) ? Settings.maxDiceTimes :  10);
+var maxDiceSides = ((Number.isSafeInteger(Settings.maxDiceSides)) ? Settings.maxDiceSides : 256);
+var maxModifier  = ((Number.isSafeInteger(Settings.maxModifier))  ? Settings.maxModifier  : 256);
+var maxCoinFlips = ((Number.isSafeInteger(Settings.maxCoinFlips)) ? Settings.maxCoinFlips :  10);
+
+var subreddit = ((typeof Settings.subreddit === 'boolean') ? Settings.subreddit : false);
+var wew = ((typeof Settings.wew === 'boolean') ? Settings.wew : false); //lad
+
+//The use of the terniary operator is to check each setting to ensure it's (somewhat) correct.
+//A 'maxDiceSides' of 'apple' is useless
+//So if the setting is invalid, we default to settings that work.
+    
+console.log('Current Settings:' +
+            '\n' + 'maxDiceTimes: ' + maxDiceTimes +
+            '\n' + 'maxDiceSides: ' + maxDiceSides +
+            '\n' + 'maxModifier : ' + maxModifier +
+            '\n' + 'maxCoinFlips: ' + maxCoinFlips +
+            '\n' + 'subreddit   : ' + subreddit +
+            '\n' + 'wew         : ' + wew + 
+            '\n\n' + 'If any settings are different than the ones in settings.json, then you incorrectly entered them.' + '\n');
 
 var robotOtter = new Discord.Client();
 
@@ -30,6 +52,10 @@ robotOtter.on('message', function (message) { //switch is for the weak
     if (message.content.beginsWith('!wiki')) {
         wiki(message, message.content);
     }
+    
+    if(message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && wew) { //wew lad
+        robotOtter.reply(message, 'lad');
+    }
 });
 
 function help(message, msgTxt) {
@@ -43,16 +69,18 @@ function help(message, msgTxt) {
 
     switch (commandName[1].toLowerCase()) {
         case 'roll':
-            helpText = '\n' + 'Formatting: !roll {times}d{dice} ' +
-                       '\n' + '{times}: Number of dice rolls (max. 10)' +
-                       '\n' + '{dice}: Number of sides per die (max. 256)' +
+            helpText = '\n' + 'Formatting: !roll {times}d{sides}[+-*/]{times}d{sides} OR {modifier} ' +
+                       '\n' + '{times}: Number of dice rolls (max. ' + maxDiceTimes + ')' +
+                       '\n' + '{sides}: Number of sides per die (max. ' + maxDiceSides + ')' +
+                       '\n' + '[+-*/]: (Monster) math operator to use' +
+                       '\n' + '{modifier}: Number to modify the roll by' +
                        '\n' + 'Example: !roll 2d20 => {8} + {14} = 22';
             break;
 
         case 'flip':
             helpText = '\n' + 'Formatting: !flip {times} ' +
-                       '\n' + '{times}: Number of coin flips (max. 10)' +
-                       '\n' + 'Example: !coin 2 => {T} + {H} = [H = 1] : [T = 1]';
+                       '\n' + '{times}: Number of coin flips (max. ' + maxCoinFlips + ')' +
+                       '\n' + 'Example: !flip 2 => {T} + {H} = [H = 1] : [T = 1]';
             break;
         
         case 'choose':
@@ -75,8 +103,8 @@ function help(message, msgTxt) {
             helpText = '\n' + '!help [command] - Brings this help menu or help for a specific command.' +
                        '\n' + '!roll {times}d{dice} - Flips a coin {# of flips} times.' +
                        '\n' + '!flip {times} - Filps a coin {# of flips} times.' +
-                       '\n' + '!choose {item1, item2,... itemN} - Chooses an item from a list.'
-                       '\n' + '!wiki [page] - Link to the OtterDnD wiki, or link directly to [page] (ie. location, players).' +
+                       '\n' + '!choose {item1, item2,... itemN} - Chooses an item from a list.' +
+                       ((subreddit) ? ('\n' + '!wiki [page] - Link to the OtterDnD wiki, or link directly to [page] (ie. location, players).') : ('')) +
                        '\n' + '{Required} - [Optional]';
     }
 
@@ -88,28 +116,28 @@ function roll(message, msgTxt) {
     console.log('Roll ' + msgTxt + '!');
     var match = msgTxt.match(diceRegex);
     if (match === null) match = ['1d20', 1, 20];
-    var times        = ((Number.isSafeInteger(parseInt(match[1], 10))) ? parseInt(match[1], 10) : 1 ); //gotta be safe
-    var diceSize     = ((Number.isSafeInteger(parseInt(match[2], 10))) ? parseInt(match[2], 10) : 20); //defaults to 1d20
-    var symbol       = ((match[3] !== undefined)                       ?          match[3]      : ''); //defaults to empty
-    var times2       = ((Number.isSafeInteger(parseInt(match[4], 10))) ? parseInt(match[4], 10) : ''); //defaults to empty
-    var diceSize2    = ((Number.isSafeInteger(parseInt(match[5], 10))) ? parseInt(match[5], 10) : ''); //defaults to empty
+    var times         = ((Number.isSafeInteger(parseInt(match[1], 10))) ? parseInt(match[1], 10) : 1 ); //gotta be safe
+    var diceSides     = ((Number.isSafeInteger(parseInt(match[2], 10))) ? parseInt(match[2], 10) : 20); //defaults to 1d20
+    var symbol        = ((match[3] !== undefined)                       ?          match[3]      : ''); //defaults to empty
+    var times2        = ((Number.isSafeInteger(parseInt(match[4], 10))) ? parseInt(match[4], 10) : ''); //defaults to empty
+    var diceSides2    = ((Number.isSafeInteger(parseInt(match[5], 10))) ? parseInt(match[5], 10) : ''); //defaults to empty
 
-    if (times > 10 || diceSize > 256) {
-        robotOtter.reply(message, 'Roll Invalid! Max {Times} is 10. Max {Dice} is 256.');
+    if (times > maxDiceTimes || diceSides > maxDiceSides) {
+        robotOtter.reply(message, 'Roll Invalid! Max {Times} is ' + maxDiceTimes + '. Max {Sides} is ' + maxDiceSides + '.');
         return;
     }
 
-    if (times <= 0 || diceSize <= 0) {
-        robotOtter.reply(message, 'Roll Invalid! {Times} or {Dice} negative or 0.');
+    if (times <= 0 || diceSides <= 0) { //Hardcoded because it's impossible to roll a dice 0 times, or a 0-sided die.
+        robotOtter.reply(message, 'Roll Invalid! {Times} or {Sides} negative or 0.');
         return;
     }
 
     console.log('match    : ' + '[' + match + ']');
     console.log('times    : ' + times);
-    console.log('diceSize : ' + diceSize);
+    console.log('diceSides : ' + diceSides);
     console.log('symbol   : ' + symbol);
     console.log('times2   : ' + times2);
-    console.log('diceSize2: ' + diceSize2);
+    console.log('diceSides2: ' + diceSides2);
     console.log('-----');
 
     var diceString = '';
@@ -117,7 +145,7 @@ function roll(message, msgTxt) {
     var currentRoll = 0;
 
     for (i = times; i > 0; i--) {
-        currentRoll = rollDice(diceSize);
+        currentRoll = rollDice(diceSides);
         diceTotal += currentRoll;
         diceString += '{' + currentRoll + ((i === 1) ? '} ' : '} + ');
 
@@ -129,18 +157,32 @@ function roll(message, msgTxt) {
 
     console.log('-----')
 
-    if (symbol !== '' && ((times2 !== '') || (diceSize2 !== ''))) {
+    if (symbol !== '' && ((times2 !== '') || (diceSides2 !== ''))) {
         diceString += '= (' + diceTotal + ') ' + symbol + ' [';
 
-        if (times2 !== '' && diceSize2 === '') {
+        if (times2 !== '' && diceSides2 === '') {
+            if (times2 > maxModifier) {
+                robotOtter.reply(message, 'Roll Invalid! Max {Modifier} is ' + maxModifier + '.');
+                return;
+            }
             diceTotal = parseEquation(diceTotal, symbol, times2);
             diceString += times2;
         }else {
+            if (times2 > maxDiceTimes || diceSides2 > maxDiceSides) {
+                robotOtter.reply(message, 'Roll Invalid! Max {Times} is ' + maxDiceTimes + '. Max {Sides} is ' + maxDiceSides + '.');
+                return;
+            }
+
+            if (times2 <= 0 || diceSides2 <= 0) { //Hardcoded because it's impossible to roll a dice 0 times, or a 0-sided die.
+                robotOtter.reply(message, 'Roll Invalid! {Times} or {Sides} negative or 0.');
+                return;
+            }
+            
             var diceTotal2 = 0;
             var times2 = ((times2 !== '') ? times2 : 1);
 
             for (i = times2; i > 0; i--) {
-                diceTotal2 += rollDice(diceSize2);
+                diceTotal2 += rollDice(diceSides2);
                 console.log(i);
                 console.log(diceTotal2);
             }
@@ -155,7 +197,7 @@ function roll(message, msgTxt) {
 
     robotOtter.reply(message, diceString);
 
-    if (diceSize === 1) {
+    if (diceSides === 1) {
         robotOtter.reply(message, 'Seriously, what did you expect?');
     }
 
@@ -168,8 +210,8 @@ function flip(message, msgTxt) {
     if (match === null) match = [1];
     var times = ((Number.isSafeInteger(parseInt(match[0], 10))) ? parseInt(match[0], 10) : 1); //gotta be safe
 
-    if (times > 10) {
-        robotOtter.reply(message, 'Flip Invalid! Max {Times} is 10.');
+    if (times > maxCoinFlips) {
+        robotOtter.reply(message, 'Flip Invalid! Max {Times} is ' + maxCoinFlips +'.');
         return;
     }
 
@@ -220,6 +262,7 @@ function choose(message, msgText) {
 }
 
 function wiki(message, msgText) {
+    if (!subreddit) return;
     console.log('!Wiki ' + msgText);
     var page = msgText.match(wikiRegex);
 
@@ -279,12 +322,20 @@ function parseEquation(num1, symbol, num2) { //Does 'num1 symbol num2': prsEqtn(
 }
 
 if (Auth.token !== '') {
-    robotOtter.loginWithToken(Auth.token);
+  console.log('Logged in with token!');
+  robotOtter.loginWithToken(Auth.token);
 }else if (Auth.email !== '' && Auth.password !== '') {
-    robotOtter.login(Auth.email, Auth.password, function (error, token) {
-        console.log(error);
-        Auth.token = token;
+  robotOtter.login(Auth.email, Auth.password, function (error, token) {
+    console.log('Logged in with email + pass!');
+    Auth.token = token;
+    fs.writeFile('./auth.json', JSON.stringify(Auth, null, 4), function(err) {
+      if(err) {
+        console.log(err + ' - Error while saving token');
+      } else {
+        console.log('Token saved');
+      }
     });
+  });
 } else {
     console.log('No authentication details found!');
 }
