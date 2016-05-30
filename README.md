@@ -87,6 +87,11 @@ Brings a help menu or help for a specific command.
 
 # Settings
 
+## "commandSymbol
+`Default: "!"
+
+The symbol placed before commands. You should only change it if "!" conflicts with another bot.
+
 ## "maxDiceTimes"
 `Default: 10`
 
@@ -114,10 +119,10 @@ Probably has the same problem as `!roll` where *really* high values cause it to 
 
 You probably don't need to change this unless you want to use !wiki for some reason.
 
-## "wew"
+## "memes"
 `Default: false`
 
-wew lad
+Enable/Disable meme replies like ayy (lmao), wew (lad).
 
 ## License
 i dunno i have no idea what each license does so i'll just leave this with no license.
