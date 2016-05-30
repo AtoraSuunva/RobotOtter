@@ -1,60 +1,78 @@
 var Discord = require('discord.js'); //Handles the API
 var Auth = require('./auth.json'); //Auth details
 var Settings = require('./settings.json'); //i have no idea
+var Puns = require('./puns.json'); //So many cat puns you'll be cat-atonic!
 var fs = require('fs'); //rw functionality
 
-//Variables!
-var helpRegex = /!help (\w+)/; //get command name
-var wikiRegex = /!wiki (\w+)/; //get page name
-var numberRegex = /(\d+)/;     //get number
-var diceRegex = /(\d+)?d(\d+)([-+*/])?(\d+)?d?(\d+)?/; //get numbers from dice string 1d3+5d6 => ['1d3+5d6', '1', '3', '+', '5', '6']
-                                                         //                           4d5     => ['4d5'    , '4', '5', undefined, undefined, undefined]
-var maxDiceTimes = ((Number.isSafeInteger(Settings.maxDiceTimes)) ? Settings.maxDiceTimes :  10);
-var maxDiceSides = ((Number.isSafeInteger(Settings.maxDiceSides)) ? Settings.maxDiceSides : 256);
-var maxModifier  = ((Number.isSafeInteger(Settings.maxModifier))  ? Settings.maxModifier  : 256);
-var maxCoinFlips = ((Number.isSafeInteger(Settings.maxCoinFlips)) ? Settings.maxCoinFlips :  10);
+var commandSymbol = Settings.commandSymbol;
+var maxDiceTimes  = ((Number.isSafeInteger(Settings.maxDiceTimes)) ? Settings.maxDiceTimes :  10);
+var maxDiceSides  = ((Number.isSafeInteger(Settings.maxDiceSides)) ? Settings.maxDiceSides : 256);
+var maxModifier   = ((Number.isSafeInteger(Settings.maxModifier))  ? Settings.maxModifier  : 256);
+var maxCoinFlips  = ((Number.isSafeInteger(Settings.maxCoinFlips)) ? Settings.maxCoinFlips :  10);
 
 var subreddit = ((typeof Settings.subreddit === 'boolean') ? Settings.subreddit : false);
-var wew = ((typeof Settings.wew === 'boolean') ? Settings.wew : false); //lad
+var memes = ((typeof Settings.memes === 'boolean') ? Settings.memes : false); //lad
 
 //The use of the terniary operator is to check each setting to ensure it's (somewhat) correct.
 //A 'maxDiceSides' of 'apple' is useless
 //So if the setting is invalid, we default to settings that work.
+
+//Variables!
+var helpRegex = /help (\w+)/;
+var wikiRegex = /wiki (\w+)/;
+var punRegex  = /pun (\w+)/;
+var numberRegex = /(\d+)/;     //get number
+var diceRegex = /(\d+)?d(\d+)([-+*/])?(\d+)?d?(\d+)?/; //get numbers from dice string 1d3+5d6 => ['1d3+5d6', '1', '3', '+', '5', '6']
+                                                         //                           4d5     => ['4d5'    , '4', '5', undefined, undefined, undefined]
+
     
 console.log('Current Settings:' +
-            '\n' + 'maxDiceTimes: ' + maxDiceTimes +
-            '\n' + 'maxDiceSides: ' + maxDiceSides +
-            '\n' + 'maxModifier : ' + maxModifier +
-            '\n' + 'maxCoinFlips: ' + maxCoinFlips +
-            '\n' + 'subreddit   : ' + subreddit +
-            '\n' + 'wew         : ' + wew + 
+            '\n' + 'commandSymbol: ' + commandSymbol +
+            '\n' + 'maxDiceTimes : ' + maxDiceTimes +
+            '\n' + 'maxDiceSides : ' + maxDiceSides +
+            '\n' + 'maxModifier  : ' + maxModifier +
+            '\n' + 'maxCoinFlips : ' + maxCoinFlips +
+            '\n' + 'subreddit    : ' + subreddit +
+            '\n' + 'memes        : ' + memes + 
             '\n\n' + 'If any settings are different than the ones in settings.json, then you incorrectly entered them.' + '\n');
 
 var robotOtter = new Discord.Client();
 
 robotOtter.on('message', function (message) { //switch is for the weak
-    if (message.content.beginsWith('!help')) {
+    if (message.content.beginsWith(commandSymbol + 'help')) {
         help(message, message.content);
     }
 
-    if (message.content.beginsWith('!roll')) {
+    if (message.content.beginsWith(commandSymbol + 'roll')) {
         roll(message, message.content);
     }
 
-    if (message.content.beginsWith('!flip')) {
+    if (message.content.beginsWith(commandSymbol + 'flip')) {
         flip(message, message.content);
     }
     
-    if (message.content.beginsWith('!choose')) {
+    if (message.content.beginsWith(commandSymbol + 'choose')) {
         choose(message, message.content);
     }
+    
+    if (message.content.beginsWith(commandSymbol + 'pun')) {
+        pun(message, message.content);
+    }
 
-    if (message.content.beginsWith('!wiki')) {
+    if (message.content.beginsWith(commandSymbol + 'wiki')) {
         wiki(message, message.content);
     }
     
-    if(message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && wew) { //wew lad
+    if(message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && memes) { //wew lad
         robotOtter.reply(message, 'lad');
+    }
+    
+    if(message.content.toLowerCase().includes('ayy') && !message.content.toLowerCase().includes('lmao') && memes) { //wew lad
+        if (message.content.toLowerCase().includes('lmoa')) {
+            robotOtter.reply(message, '*lmao');
+        } else {
+            robotOtter.reply(message, 'lmao');
+        }
     }
 });
 
@@ -69,7 +87,7 @@ function help(message, msgTxt) {
 
     switch (commandName[1].toLowerCase()) {
         case 'roll':
-            helpText = '\n' + 'Formatting: !roll {times}d{sides}[+-*/]{times}d{sides} OR {modifier} ' +
+            helpText = '\n' + 'Formatting: ' + commandSymbol + 'roll {times}d{sides}[+-*/]{times}d{sides} OR {modifier} ' +
                        '\n' + '{times}: Number of dice rolls (max. ' + maxDiceTimes + ')' +
                        '\n' + '{sides}: Number of sides per die (max. ' + maxDiceSides + ')' +
                        '\n' + '[+-*/]: (Monster) math operator to use' +
@@ -78,33 +96,33 @@ function help(message, msgTxt) {
             break;
 
         case 'flip':
-            helpText = '\n' + 'Formatting: !flip {times} ' +
+            helpText = '\n' + 'Formatting: ' + commandSymbol + 'flip {times} ' +
                        '\n' + '{times}: Number of coin flips (max. ' + maxCoinFlips + ')' +
                        '\n' + 'Example: !flip 2 => {T} + {H} = [H = 1] : [T = 1]';
             break;
         
         case 'choose':
-            helpText = '\n' + 'Formatting: !choose {item1, item2,... itemN}' +
+            helpText = '\n' + 'Formatting: ' + commandSymbol + 'choose {item1, item2,... itemN}' +
                        '\n' + '{itemN}: Items to select from' +
                        '\n' + 'Example: !choose yes, no => -> yes';
         
         case 'wiki':
-            helpText = '\n' + 'Formatting: !wiki [page] ' +
+            helpText = '\n' + 'Formatting: ' + commandSymbol + 'wiki [page] ' +
                        '\n' + '[page]: Page name to show: ' +
                        '\n' + '[items, quests, players, locations]' +
                        '\n' + 'Example: !wiki players => /r/OtterDnD/wiki/players';
             break;
 
         case 'help':
-            helpText = 'Congrats! You mastered !help';
+            helpText = 'Congrats! You mastered ' + commandSymbol + 'help';
             break;
 
         default:
-            helpText = '\n' + '!help [command] - Brings this help menu or help for a specific command.' +
-                       '\n' + '!roll {times}d{dice} - Flips a coin {# of flips} times.' +
-                       '\n' + '!flip {times} - Filps a coin {# of flips} times.' +
-                       '\n' + '!choose {item1, item2,... itemN} - Chooses an item from a list.' +
-                       ((subreddit) ? ('\n' + '!wiki [page] - Link to the OtterDnD wiki, or link directly to [page] (ie. location, players).') : ('')) +
+            helpText = '\n' + commandSymbol + 'help [command] - Brings this help menu or help for a specific command.' +
+                       '\n' + commandSymbol + 'roll {times}d{dice} - Flips a coin {# of flips} times.' +
+                       '\n' + commandSymbol + 'flip {times} - Filps a coin {# of flips} times.' +
+                       '\n' + commandSymbol + 'choose {item1, item2,... itemN} - Chooses an item from a list.' +
+                       ((subreddit) ? ('\n' + commandSymbol + 'wiki [page] - Link to the OtterDnD wiki, or link directly to [page] (ie. location, players).') : ('')) +
                        '\n' + '{Required} - [Optional]';
     }
 
@@ -258,6 +276,20 @@ function choose(message, msgText) {
   //Sometimes you need to be concise
   //Because nobody else will see your code :(
   //But maybe that's a good thing :)
+  console.log('-----')
+}
+
+function pun(message, msgText) {
+  console.log('!pun')
+  var category = msgText.match(punRegex);
+  
+  console.log(category);
+  
+  if (category[1] === 'cat') {
+    robotOtter.reply(message, Puns['cat'][Math.floor(Math.random() * Puns['cat'].length)]); 
+  } else {
+    robotOtter.reply(message, Puns['default'][Math.floor(Math.random() * Puns['default'].length)]);
+  }
   console.log('-----')
 }
 

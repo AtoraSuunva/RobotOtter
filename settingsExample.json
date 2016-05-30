@@ -1,8 +1,9 @@
 {
-  "maxDiceTimes": 10,
-  "maxDiceSides": 256,
-  "maxModifier" : 1000,
-  "maxCoinFlips": 10,
-  "subreddit"   : false,
-  "wew"         : true
+  "commandSymbol": "!",
+  "maxDiceTimes" : 10,
+  "maxDiceSides" : 256,
+  "maxModifier"  : 1000,
+  "maxCoinFlips" : 10,
+  "subreddit"    : false,
+  "memes"        : true
 }
