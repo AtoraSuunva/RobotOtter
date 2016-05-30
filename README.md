@@ -60,6 +60,15 @@ Chooses an item from a comma-delimited list of them.
 
     -> world
 
+## !pun {category}
+Says a pun.
+
+{category}: The kind of pun.
+
+*Example: !pun cat =>*
+
+    Purr-fect
+
 ## !wiki [page]
 *Subreddit mode only*
 
@@ -87,7 +96,7 @@ Brings a help menu or help for a specific command.
 
 # Settings
 
-## "commandSymbol
+## "commandSymbol"
 `Default: "!"
 
 The symbol placed before commands. You should only change it if "!" conflicts with another bot.
