@@ -97,7 +97,7 @@ Brings a help menu or help for a specific command.
 # Settings
 
 ## "commandSymbol"
-`Default: "!"
+`Default: "!"`
 
 The symbol placed before commands. You should only change it if "!" conflicts with another bot.
 
