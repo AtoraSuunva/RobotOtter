@@ -406,3 +406,5 @@ if (Auth.token !== '') {
 } else {
     console.log('No authentication details found!');
 }
+
+robotOtter.setPlayingGame(commandSymbol + 'help - https://goo.gl/nNpZYR');
