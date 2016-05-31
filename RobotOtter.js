@@ -4,11 +4,11 @@ var Settings = require('./settings.json'); //i have no idea
 var Puns = require('./puns.json'); //So many cat puns you'll be cat-atonic!
 var fs = require('fs'); //rw functionality
 
-var commandSymbol = Settings.commandSymbol;
-var maxDiceTimes  = ((Number.isSafeInteger(Settings.maxDiceTimes)) ? Settings.maxDiceTimes :  10);
-var maxDiceSides  = ((Number.isSafeInteger(Settings.maxDiceSides)) ? Settings.maxDiceSides : 256);
-var maxModifier   = ((Number.isSafeInteger(Settings.maxModifier))  ? Settings.maxModifier  : 256);
-var maxCoinFlips  = ((Number.isSafeInteger(Settings.maxCoinFlips)) ? Settings.maxCoinFlips :  10);
+var commandSymbol = ((Settings.commandSymbol !== undefined)        ? Settings.commandSymbol : '!');
+var maxDiceTimes  = ((Number.isSafeInteger(Settings.maxDiceTimes)) ? Settings.maxDiceTimes  :  10);
+var maxDiceSides  = ((Number.isSafeInteger(Settings.maxDiceSides)) ? Settings.maxDiceSides  : 256);
+var maxModifier   = ((Number.isSafeInteger(Settings.maxModifier))  ? Settings.maxModifier   : 256);
+var maxCoinFlips  = ((Number.isSafeInteger(Settings.maxCoinFlips)) ? Settings.maxCoinFlips  :  10);
 
 var subreddit = ((typeof Settings.subreddit === 'boolean') ? Settings.subreddit : false);
 var memes = ((typeof Settings.memes === 'boolean') ? Settings.memes : false); //lad
@@ -151,9 +151,10 @@ function help(message, msgTxt) {
 
         default:
             helpText = '\n' + commandSymbol + 'help [command] - Brings this help menu or help for a specific command.' +
-                       '\n' + commandSymbol + 'roll {times}d{dice} - Flips a coin {# of flips} times.' +
+                       '\n' + commandSymbol + 'roll {times}d{dice} - Rolls a dice following the DnD style.' +
                        '\n' + commandSymbol + 'flip {times} - Filps a coin {# of flips} times.' +
                        '\n' + commandSymbol + 'choose {item1, item2,... itemN} - Chooses an item from a list.' +
+                       '\n' + commandSymbol + 'pun {*cat*-egory} - Says a pun.'
                        ((subreddit) ? ('\n' + commandSymbol + 'wiki [page] - Link to the OtterDnD wiki, or link directly to [page] (ie. location, players).') : ('')) +
                        '\n' + '{Required} - [Optional]';
     }
