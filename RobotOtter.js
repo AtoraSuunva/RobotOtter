@@ -165,7 +165,7 @@ function help(message, msgTxt) {
                        '\n' + commandSymbol + 'roll {times}d{dice} - Rolls a dice following the DnD style.' +
                        '\n' + commandSymbol + 'flip {times} - Filps a coin {# of flips} times.' +
                        '\n' + commandSymbol + 'choose {item1, item2,... itemN} - Chooses an item from a list.' +
-                       '\n' + commandSymbol + 'pun {*cat*-egory} - Says a pun.'
+                       '\n' + commandSymbol + 'pun {*cat*-egory} - Says a pun.' +
                        ((subreddit) ? ('\n' + commandSymbol + 'wiki [page] - Link to the OtterDnD wiki, or link directly to [page] (ie. location, players).') : ('')) +
                        '\n' + '{Required} - [Optional]';
     }
