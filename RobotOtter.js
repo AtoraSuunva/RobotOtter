@@ -38,6 +38,17 @@ console.log('Current Settings:' +
 
 var robotOtter = new Discord.Client();
 
+robotOtter.userAgent.url = "https://github.com/AtlasTheBot/RobotOtter-Discord";
+robotOtter.userAgent.version = "0.9.0";
+
+robotOtter.on("ready", function () {
+	console.log('My body is ready! Memeing in: \n' + 
+                robotOtter.servers.length + ' servers,\n' +
+                robotOtter.channels.length + ' channels.');
+                
+    robotOtter.setPlayingGame(commandSymbol + 'help | goo.gl/nNpZYR');
+});
+
 robotOtter.on('message', function (message) { //switch is for the weak
     if (message.content.beginsWith(commandSymbol + 'help')) {
         help(message, message.content);
@@ -406,5 +417,3 @@ if (Auth.token !== '') {
 } else {
     console.log('No authentication details found!');
 }
-
-robotOtter.setPlayingGame(commandSymbol + 'help - https://goo.gl/nNpZYR');
