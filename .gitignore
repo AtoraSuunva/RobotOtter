@@ -49,4 +49,9 @@ Temporary Items
 # Config Files
 auth.json
 settings.json
-settings.json
+*.sln
+*.user
+*.csproj
+.vs/
+bin/
+obj/

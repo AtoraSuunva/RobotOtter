@@ -74,6 +74,26 @@ robotOtter.on('message', function (message) { //switch is for the weak
             robotOtter.reply(message, 'lmao');
         }
     }
+
+    if (message.content === 'Cat.' && memes) { //Cat.
+        robotOtter.reply(message, 'Cat.');
+    }
+
+    if (message.content.includes(':(') && memes) { //Don't be sad!
+        robotOtter.reply(message, ':)');
+    }
+
+    if ((message.content.includes('kms') || message.content.toLowerCase().includes('kill myself')) && memes) { //don't do it
+        robotOtter.reply(message, 'http://www.suicidepreventionlifeline.org/');
+    }
+
+    if ((message.content.includes('kys') || message.content.toLowerCase().includes('kill yourself')) && memes) { //rude
+        robotOtter.reply(message, 'Wow rude.');
+    }
+
+    if (message.content.beginsWith(commandSymbol + 'wakeup') && memes) { //WAKE ME UP INSIDE
+        robotOtter.reply(message, 'CAN\'T WAKE UP.');
+    }
 });
 
 function help(message, msgTxt) {
@@ -100,13 +120,21 @@ function help(message, msgTxt) {
                        '\n' + '{times}: Number of coin flips (max. ' + maxCoinFlips + ')' +
                        '\n' + 'Example: !flip 2 => {T} + {H} = [H = 1] : [T = 1]';
             break;
-        
+
         case 'choose':
             helpText = '\n' + 'Formatting: ' + commandSymbol + 'choose {item1, item2,... itemN}' +
                        '\n' + '{itemN}: Items to select from' +
                        '\n' + 'Example: !choose yes, no => -> yes';
+            break;
+        
+        case 'pun':
+            helpText = '\n' + 'Formatting: ' + commandSymbol + 'pun {*cat*-egory}' +
+                       '\n' + '{*cat*-egory}: Kind of puns' +
+                       '\n' + 'Example: !pun cat => *Purr*fect = Perfect';
+            break;
         
         case 'wiki':
+            if (!subreddit) break; //no
             helpText = '\n' + 'Formatting: ' + commandSymbol + 'wiki [page] ' +
                        '\n' + '[page]: Page name to show: ' +
                        '\n' + '[items, quests, players, locations]' +
@@ -115,6 +143,10 @@ function help(message, msgTxt) {
 
         case 'help':
             helpText = 'Congrats! You mastered ' + commandSymbol + 'help';
+            break;
+
+        case 'me':
+            helpText = 'It\'s too late, you cannot be saved.';
             break;
 
         default:
@@ -145,7 +177,7 @@ function roll(message, msgTxt) {
         return;
     }
 
-    if (times <= 0 || diceSides <= 0) { //Hardcoded because it's impossible to roll a dice 0 times, or a 0-sided die.
+    if (times <= 0 || diceSides <= 0) { //Hardcoded because it's impossible to roll a dice 0 times, or a 0-sided die. Try it, I dare you.
         robotOtter.reply(message, 'Roll Invalid! {Times} or {Sides} negative or 0.');
         return;
     }
@@ -282,11 +314,12 @@ function choose(message, msgText) {
 function pun(message, msgText) {
   console.log('!pun')
   var category = msgText.match(punRegex);
+  category = category[1]; //regex pls
   
   console.log(category);
   
-  if (category[1] === 'cat') {
-    robotOtter.reply(message, Puns['cat'][Math.floor(Math.random() * Puns['cat'].length)]); 
+  if (Puns[category] !== undefined) {
+    robotOtter.reply(message, Puns[category][Math.floor(Math.random() * Puns[category].length)]); 
   } else {
     robotOtter.reply(message, Puns['default'][Math.floor(Math.random() * Puns['default'].length)]);
   }
@@ -330,6 +363,7 @@ function rollDice(max) {
 }
 
 function parseEquation(num1, symbol, num2) { //Does 'num1 symbol num2': prsEqtn(1, '+', 1) => 2
+    //this is probably a horrible way of doing it but you should never trust eval(), it's  *evil* (Get it? E-val, E-vil?)
     switch (symbol) {
         case '-':
             num1 -= num2;
