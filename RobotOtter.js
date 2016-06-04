@@ -50,6 +50,8 @@ robotOtter.on("ready", function () {
 });
 
 robotOtter.on('message', function (message) { //switch is for the weak
+    if (message.author.equals(robotOtter.user)) return; //Don't reply to itself
+    
     if (message.content.beginsWith(commandSymbol + 'help')) {
         help(message, message.content);
     }
@@ -110,7 +112,7 @@ robotOtter.on('message', function (message) { //switch is for the weak
         robotOtter.sendMessage(message.channel, 'CAN\'T WAKE UP.');
     }
     
-    if ((message.content.includes('fuck') || message.content.includes('bitch') || message.content.includes('cunt')) && memes) { //WAKE ME UP INSIDE
+    if ((message.content.includes('fuck') || message.content.includes('bitch') || message.content.includes('shit')) && memes) { //WAKE ME UP INSIDE
         robotOtter.sendMessage(message.channel, 'This is a family friendly chat, don\'t you ever fucking swear again.');
     }
 });
