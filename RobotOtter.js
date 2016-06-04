@@ -39,7 +39,7 @@ console.log('Current Settings:' +
 var robotOtter = new Discord.Client();
 
 robotOtter.userAgent.url = "https://github.com/AtlasTheBot/RobotOtter-Discord";
-robotOtter.userAgent.version = "0.9.0";
+robotOtter.userAgent.version = "0.9.2";
 
 robotOtter.on("ready", function () {
 	console.log('My body is ready! Memeing in: \n' + 
@@ -69,41 +69,49 @@ robotOtter.on('message', function (message) { //switch is for the weak
     if (message.content.beginsWith(commandSymbol + 'pun')) {
         pun(message, message.content);
     }
+    
+    if (message.content.beginsWith(commandSymbol + 'stats')) {
+        stats(message, message.content);
+    }
 
     if (message.content.beginsWith(commandSymbol + 'wiki')) {
         wiki(message, message.content);
     }
     
     if(message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && memes) { //wew lad
-        robotOtter.reply(message, 'lad');
+        robotOtter.sendMessage(message.channel, 'lad');
     }
     
     if(message.content.toLowerCase().includes('ayy') && !message.content.toLowerCase().includes('lmao') && memes) { //wew lad
         if (message.content.toLowerCase().includes('lmoa')) {
-            robotOtter.reply(message, '*lmao');
+            robotOtter.sendMessage(message.channel, '*lmao');
         } else {
-            robotOtter.reply(message, 'lmao');
+            robotOtter.sendMessage(message.channel, 'lmao');
         }
     }
 
     if (message.content === 'Cat.' && memes) { //Cat.
-        robotOtter.reply(message, 'Cat.');
+        robotOtter.sendMessage(message.channel, 'Cat.');
     }
 
     if (message.content.includes(':(') && memes) { //Don't be sad!
-        robotOtter.reply(message, ':)');
+        robotOtter.sendMessage(message.channel, ':)');
     }
 
     if ((message.content.includes('kms') || message.content.toLowerCase().includes('kill myself')) && memes) { //don't do it
-        robotOtter.reply(message, 'http://www.suicidepreventionlifeline.org/');
+        robotOtter.sendMessage(message.channel, 'http://www.suicidepreventionlifeline.org/');
     }
 
     if ((message.content.includes('kys') || message.content.toLowerCase().includes('kill yourself')) && memes) { //rude
-        robotOtter.reply(message, 'Wow rude.');
+        robotOtter.sendMessage(message.channel, 'Wow rude.');
     }
 
     if (message.content.beginsWith(commandSymbol + 'wakeup') && memes) { //WAKE ME UP INSIDE
-        robotOtter.reply(message, 'CAN\'T WAKE UP.');
+        robotOtter.sendMessage(message.channel, 'CAN\'T WAKE UP.');
+    }
+    
+    if ((message.content.includes('fuck') || message.content.includes('bitch') || message.content.includes('cunt')) && memes) { //WAKE ME UP INSIDE
+        robotOtter.sendMessage(message.channel, 'This is a family friendly chat, don\'t you ever fucking swear again.');
     }
 });
 
@@ -338,6 +346,17 @@ function pun(message, msgText) {
   console.log('-----')
 }
 
+function stats(message, msgText) {
+    sendMessage(message.channel, 
+                'Currently serving:' + '\n' +
+                robotOtter.users + ' users,' + '\n' +
+                robotOtter.channels + ' channels,' + '\n' +
+                robotOtter.privateChannels + ' direct messages,' + '\n' +
+                robotOtter.servers + ' servers.' + '\n' +
+                'Up for: ' + msToTime(robotOtter.uptime)
+                );
+}
+
 function wiki(message, msgText) {
     if (!subreddit) return;
     console.log('!Wiki ' + msgText);
@@ -397,6 +416,20 @@ function parseEquation(num1, symbol, num2) { //Does 'num1 symbol num2': prsEqtn(
             console.log('Error in parseEquation()!')
     }
     return num1;
+}
+
+function msToTime(duration) {
+    var seconds    = parseInt((duration/1000)%60)
+        ,minutes    = parseInt((duration/(1000*60))%60)
+        ,hours      = parseInt((duration/(1000*60*60))%24)
+        ,days       = parseInt((duration/(1000*60*60*24)));
+
+    var timeString = ((days >= 1)    ? ((days    > 1) ? days    + ' Days '   : days    + ' Day ')    : '') + 
+                     ((hours >= 1)   ? ((hours   > 1) ? hours   + ' Hours '  : hours   + ' Hour ')   : '') + 
+                     ((minutes >= 1) ? ((minutes > 1) ? minutes + ' Minutes ': minutes + ' Minutes '): '') + 
+                     ((seconds >= 1) ? ((seconds > 1) ? seconds + ' Seconds' : seconds + ' Second')  : '');
+
+    return timeString;
 }
 
 if (Auth.token !== '') {
