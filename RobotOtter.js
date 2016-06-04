@@ -349,7 +349,7 @@ function pun(message, msgText) {
 }
 
 function stats(message, msgText) {
-    sendMessage(message.channel, 
+    robotOtter.sendMessage(message.channel, 
                 'Currently serving:' + '\n' +
                 robotOtter.users + ' users,' + '\n' +
                 robotOtter.channels + ' channels,' + '\n' +
