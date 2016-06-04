@@ -4,11 +4,6 @@ var Settings = require('./settings.json'); //i have no idea
 var Puns = require('./puns.json'); //So many cat puns you'll be cat-atonic!
 var fs = require('fs'); //rw functionality
 
-robotOtter.userAgent = {
-    "url": "https://github.com/AtlasTheBot/RobotOtter-Discord",
-    "version": "6.66"
-}
-
 var commandSymbol = ((Settings.commandSymbol !== undefined)        ? Settings.commandSymbol : '!');
 var maxDiceTimes  = ((Number.isSafeInteger(Settings.maxDiceTimes)) ? Settings.maxDiceTimes  :  10);
 var maxDiceSides  = ((Number.isSafeInteger(Settings.maxDiceSides)) ? Settings.maxDiceSides  : 256);
@@ -44,7 +39,7 @@ console.log('Current Settings:' +
 var robotOtter = new Discord.Client();
 
 robotOtter.userAgent.url = "https://github.com/AtlasTheBot/RobotOtter-Discord";
-robotOtter.userAgent.version = "0.9.0";
+robotOtter.userAgent.version = "0.9.2";
 
 robotOtter.on("ready", function () {
 	console.log('My body is ready! Memeing in: \n' + 
@@ -113,6 +108,10 @@ robotOtter.on('message', function (message) { //switch is for the weak
 
     if (message.content.beginsWith(commandSymbol + 'wakeup') && memes) { //WAKE ME UP INSIDE
         robotOtter.sendMessage(message.channel, 'CAN\'T WAKE UP.');
+    }
+    
+    if ((message.content.includes('fuck') || message.content.includes('bitch') || message.content.includes('cunt')) && memes) { //WAKE ME UP INSIDE
+        robotOtter.sendMessage(message.channel, 'This is a family friendly chat, don\'t you ever fucking swear again.');
     }
 });
 
