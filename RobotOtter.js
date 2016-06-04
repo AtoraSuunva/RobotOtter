@@ -4,11 +4,16 @@ var Settings = require('./settings.json'); //i have no idea
 var Puns = require('./puns.json'); //So many cat puns you'll be cat-atonic!
 var fs = require('fs'); //rw functionality
 
-var commandSymbol = Settings.commandSymbol;
-var maxDiceTimes  = ((Number.isSafeInteger(Settings.maxDiceTimes)) ? Settings.maxDiceTimes :  10);
-var maxDiceSides  = ((Number.isSafeInteger(Settings.maxDiceSides)) ? Settings.maxDiceSides : 256);
-var maxModifier   = ((Number.isSafeInteger(Settings.maxModifier))  ? Settings.maxModifier  : 256);
-var maxCoinFlips  = ((Number.isSafeInteger(Settings.maxCoinFlips)) ? Settings.maxCoinFlips :  10);
+robotOtter.userAgent = {
+    "url": "https://github.com/AtlasTheBot/RobotOtter-Discord",
+    "version": "6.66"
+}
+
+var commandSymbol = ((Settings.commandSymbol !== undefined)        ? Settings.commandSymbol : '!');
+var maxDiceTimes  = ((Number.isSafeInteger(Settings.maxDiceTimes)) ? Settings.maxDiceTimes  :  10);
+var maxDiceSides  = ((Number.isSafeInteger(Settings.maxDiceSides)) ? Settings.maxDiceSides  : 256);
+var maxModifier   = ((Number.isSafeInteger(Settings.maxModifier))  ? Settings.maxModifier   : 256);
+var maxCoinFlips  = ((Number.isSafeInteger(Settings.maxCoinFlips)) ? Settings.maxCoinFlips  :  10);
 
 var subreddit = ((typeof Settings.subreddit === 'boolean') ? Settings.subreddit : false);
 var memes = ((typeof Settings.memes === 'boolean') ? Settings.memes : false); //lad
@@ -38,6 +43,17 @@ console.log('Current Settings:' +
 
 var robotOtter = new Discord.Client();
 
+robotOtter.userAgent.url = "https://github.com/AtlasTheBot/RobotOtter-Discord";
+robotOtter.userAgent.version = "0.9.0";
+
+robotOtter.on("ready", function () {
+	console.log('My body is ready! Memeing in: \n' + 
+                robotOtter.servers.length + ' servers,\n' +
+                robotOtter.channels.length + ' channels.');
+                
+    robotOtter.setPlayingGame(commandSymbol + 'help | goo.gl/nNpZYR');
+});
+
 robotOtter.on('message', function (message) { //switch is for the weak
     if (message.content.beginsWith(commandSymbol + 'help')) {
         help(message, message.content);
@@ -58,41 +74,45 @@ robotOtter.on('message', function (message) { //switch is for the weak
     if (message.content.beginsWith(commandSymbol + 'pun')) {
         pun(message, message.content);
     }
+    
+    if (message.content.beginsWith(commandSymbol + 'stats')) {
+        stats(message, message.content);
+    }
 
     if (message.content.beginsWith(commandSymbol + 'wiki')) {
         wiki(message, message.content);
     }
     
     if(message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && memes) { //wew lad
-        robotOtter.reply(message, 'lad');
+        robotOtter.sendMessage(message.channel, 'lad');
     }
     
     if(message.content.toLowerCase().includes('ayy') && !message.content.toLowerCase().includes('lmao') && memes) { //wew lad
         if (message.content.toLowerCase().includes('lmoa')) {
-            robotOtter.reply(message, '*lmao');
+            robotOtter.sendMessage(message.channel, '*lmao');
         } else {
-            robotOtter.reply(message, 'lmao');
+            robotOtter.sendMessage(message.channel, 'lmao');
         }
     }
 
     if (message.content === 'Cat.' && memes) { //Cat.
-        robotOtter.reply(message, 'Cat.');
+        robotOtter.sendMessage(message.channel, 'Cat.');
     }
 
     if (message.content.includes(':(') && memes) { //Don't be sad!
-        robotOtter.reply(message, ':)');
+        robotOtter.sendMessage(message.channel, ':)');
     }
 
     if ((message.content.includes('kms') || message.content.toLowerCase().includes('kill myself')) && memes) { //don't do it
-        robotOtter.reply(message, 'http://www.suicidepreventionlifeline.org/');
+        robotOtter.sendMessage(message.channel, 'http://www.suicidepreventionlifeline.org/');
     }
 
     if ((message.content.includes('kys') || message.content.toLowerCase().includes('kill yourself')) && memes) { //rude
-        robotOtter.reply(message, 'Wow rude.');
+        robotOtter.sendMessage(message.channel, 'Wow rude.');
     }
 
     if (message.content.beginsWith(commandSymbol + 'wakeup') && memes) { //WAKE ME UP INSIDE
-        robotOtter.reply(message, 'CAN\'T WAKE UP.');
+        robotOtter.sendMessage(message.channel, 'CAN\'T WAKE UP.');
     }
 });
 
@@ -151,9 +171,10 @@ function help(message, msgTxt) {
 
         default:
             helpText = '\n' + commandSymbol + 'help [command] - Brings this help menu or help for a specific command.' +
-                       '\n' + commandSymbol + 'roll {times}d{dice} - Flips a coin {# of flips} times.' +
+                       '\n' + commandSymbol + 'roll {times}d{dice} - Rolls a dice following the DnD style.' +
                        '\n' + commandSymbol + 'flip {times} - Filps a coin {# of flips} times.' +
                        '\n' + commandSymbol + 'choose {item1, item2,... itemN} - Chooses an item from a list.' +
+                       '\n' + commandSymbol + 'pun {*cat*-egory} - Says a pun.' +
                        ((subreddit) ? ('\n' + commandSymbol + 'wiki [page] - Link to the OtterDnD wiki, or link directly to [page] (ie. location, players).') : ('')) +
                        '\n' + '{Required} - [Optional]';
     }
@@ -326,6 +347,17 @@ function pun(message, msgText) {
   console.log('-----')
 }
 
+function stats(message, msgText) {
+    sendMessage(message.channel, 
+                'Currently serving:' + '\n' +
+                robotOtter.users + ' users,' + '\n' +
+                robotOtter.channels + ' channels,' + '\n' +
+                robotOtter.privateChannels + ' direct messages,' + '\n' +
+                robotOtter.servers + ' servers.' + '\n' +
+                'Up for: ' + msToTime(robotOtter.uptime)
+                );
+}
+
 function wiki(message, msgText) {
     if (!subreddit) return;
     console.log('!Wiki ' + msgText);
@@ -385,6 +417,20 @@ function parseEquation(num1, symbol, num2) { //Does 'num1 symbol num2': prsEqtn(
             console.log('Error in parseEquation()!')
     }
     return num1;
+}
+
+function msToTime(duration) {
+    var seconds    = parseInt((duration/1000)%60)
+        ,minutes    = parseInt((duration/(1000*60))%60)
+        ,hours      = parseInt((duration/(1000*60*60))%24)
+        ,days       = parseInt((duration/(1000*60*60*24)));
+
+    var timeString = ((days >= 1)    ? ((days    > 1) ? days    + ' Days '   : days    + ' Day ')    : '') + 
+                     ((hours >= 1)   ? ((hours   > 1) ? hours   + ' Hours '  : hours   + ' Hour ')   : '') + 
+                     ((minutes >= 1) ? ((minutes > 1) ? minutes + ' Minutes ': minutes + ' Minutes '): '') + 
+                     ((seconds >= 1) ? ((seconds > 1) ? seconds + ' Seconds' : seconds + ' Second')  : '');
+
+    return timeString;
 }
 
 if (Auth.token !== '') {

@@ -6,6 +6,20 @@ Discord chatbot for rolling dice &amp; flipping coins. Also some other features 
 Test it on Discord [here](https://discord.gg/0w6AYrrMIUfO71oV)!
 
 # How to use
+
+## Connect to Discord
+
+Literally click 4 times.
+
+0. Click [here](https://discordapp.com/oauth2/authorize?client_id=187027320714952704&scope=bot&permissions=0).
+1. Select a server.
+2. Authorize.
+3. gg no re
+
+## Manual Setup
+
+If for some reason you want to host it yourself.
+
 0. Install [Node.js](https://nodejs.org/en/download/)
 1. Install [discord.js](http://discordjs.readthedocs.org/en/latest/installing.html).
 2. Download/Pull RobotOtter (Obviously) and extract it.
@@ -97,7 +111,7 @@ Brings a help menu or help for a specific command.
 # Settings
 
 ## "commandSymbol"
-`Default: "!"
+`Default: "!"`
 
 The symbol placed before commands. You should only change it if "!" conflicts with another bot.
 
