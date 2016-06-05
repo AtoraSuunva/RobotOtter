@@ -20,16 +20,42 @@ Literally click 4 times.
 
 If for some reason you want to host it yourself.
 
-0. Install [Node.js](https://nodejs.org/en/download/)
-1. Install [discord.js](http://discordjs.readthedocs.org/en/latest/installing.html).
-2. Download/Pull RobotOtter (Obviously) and extract it.
-3. Create a Discord account (If you haven't already).
-4. Join the channels you want to use the bot on.
-5. Fill out 'email' and 'password' in authExample.json.
-6. Rename it to auth.json.
-7. Run in command line `node RobotOtter.js` while in the installation folder.
+* Install [Node.js](https://nodejs.org/en/download/)
+* Install [discord.js](http://discordjs.readthedocs.org/en/latest/installing.html).
+* Download/Pull RobotOtter (Obviously) and extract it.
 
-If that doesn't work it's probably my fault.
+### Public Bot
+
+See [here](https://discordapp.com/developers/docs/topics/oauth2#bot-vs-user-accounts), public bots *MUST* use a bot account, not a user account. Also gives the bot a sweet [BOT] tag.
+
+* Register an app [here](https://discordapp.com/developers/applications/me).
+* Create a bot user.
+* Copy the token to `authExample.json`.
+
+It should look like this:
+
+    {
+        "email": "Something@Here.Maybe",
+        "password": "^^this tbh fam",
+        "token": "longstringofrandomcharacters"
+    }
+
+* Rename `authExample.json` to `auth.json`.
+* Read `Run`
+
+### Private Bot
+
+* Create a Discord account (If you haven't already).
+* Join the channels you want to use the bot on.
+* Fill out `email` and `password` in `authExample.json`.
+* Rename it to `auth.json`. 
+* Read `Run`.
+
+### Run
+
+* Run in command line `node RobotOtter.js` while in the installation folder.
+
+If that doesn't work it's probably my fault because I suck at explaining.
 
 # Commands
 
@@ -145,7 +171,7 @@ You probably don't need to change this unless you want to use !wiki for some rea
 ## "memes"
 `Default: false`
 
-Enable/Disable meme replies like ayy (lmao), wew (lad).
+An array (list) of meme settings. Enable/Disable by changing each one to true/false.
 
 ## License
 i dunno i have no idea what each license does so i'll just leave this with no license.
