@@ -11,7 +11,7 @@ Test it on Discord [here](https://discord.gg/0w6AYrrMIUfO71oV)!
 
 Literally click 4 times.
 
-0. Click [here](https://discordapp.com/oauth2/authorize?client_id=187027320714952704&scope=bot&permissions=0).
+0. Click [here](https://discordapp.com/oauth2/authorize?client_id=189078347207278593&scope=bot&permissions=0).
 1. Select a server.
 2. Authorize.
 3. gg no re
