@@ -51,34 +51,22 @@ robotOtter.on("ready", function () {
 
 robotOtter.on('message', function (message) { //switch is for the weak
     if (message.author.equals(robotOtter.user)) return; //Don't reply to itself
-    
-    if (message.content.beginsWith(commandSymbol + 'help')) {
-        help(message, message.content);
-    }
+        
+    if (message.content.beginsWith(commandSymbol + 'help')) help(message, message.content);
 
-    if (message.content.beginsWith(commandSymbol + 'roll')) {
-        roll(message, message.content);
-    }
+    if (message.content.beginsWith(commandSymbol + 'roll')) roll(message, message.content);
 
-    if (message.content.beginsWith(commandSymbol + 'flip')) {
-        flip(message, message.content);
-    }
+    if (message.content.beginsWith(commandSymbol + 'flip')) flip(message, message.content);
     
-    if (message.content.beginsWith(commandSymbol + 'choose')) {
-        choose(message, message.content);
-    }
+    if (message.content.beginsWith(commandSymbol + 'choose')) choose(message, message.content);
     
-    if (message.content.beginsWith(commandSymbol + 'pun')) {
-        pun(message, message.content);
-    }
+    if (message.content.beginsWith(commandSymbol + 'pun')) pun(message, message.content);
     
-    if (message.content.beginsWith(commandSymbol + 'stats')) {
-        stats(message, message.content);
-    }
-
-    if (message.content.beginsWith(commandSymbol + 'wiki')) {
-        wiki(message, message.content);
-    }
+    if (message.content.beginsWith(commandSymbol + 'stats')) stats(message, message.content);
+    
+    if (message.content.beginsWith(commandSymbol + 'info')) info(message, message.content);
+        
+    if (message.content.beginsWith(commandSymbol + 'wiki')) wiki(message, message.content);
     
     if(message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && memes) { //wew lad
         robotOtter.sendMessage(message.channel, 'lad');
@@ -153,6 +141,14 @@ function help(message, msgTxt) {
                        '\n' + '{*cat*-egory}: Kind of puns' +
                        '\n' + 'Example: !pun cat => *Purr*fect = Perfect';
             break;
+            
+        case 'stats':
+            helpText = 'It\'s just ' + commandSymbol + 'stats. Nothing more, nothing less.';
+            break;
+        
+        case 'info':
+            helpText = 'What more do you want from me?';
+            break;
         
         case 'wiki':
             if (!subreddit) break; //no
@@ -176,6 +172,8 @@ function help(message, msgTxt) {
                        '\n' + commandSymbol + 'flip {times} - Filps a coin {# of flips} times.' +
                        '\n' + commandSymbol + 'choose {item1, item2,... itemN} - Chooses an item from a list.' +
                        '\n' + commandSymbol + 'pun {*cat*-egory} - Says a pun.' +
+                       '\n' + commandSymbol + 'stats - RobotOtter stats' +
+                       '\n' + commandSymbol + 'info - Info about RobotOtter' +
                        ((subreddit) ? ('\n' + commandSymbol + 'wiki [page] - Link to the OtterDnD wiki, or link directly to [page] (ie. location, players).') : ('')) +
                        '\n' + '{Required} - [Optional]';
     }
@@ -351,11 +349,20 @@ function pun(message, msgText) {
 function stats(message, msgText) {
     robotOtter.sendMessage(message.channel, 
                 'Currently serving:' + '\n' +
-                robotOtter.users + ' users,' + '\n' +
-                robotOtter.channels + ' channels,' + '\n' +
-                robotOtter.privateChannels + ' direct messages,' + '\n' +
-                robotOtter.servers + ' servers.' + '\n' +
+                robotOtter.users.length + ((robotOtter.users.length > 1 ) ? ' users,' : ' user,') + '\n' +
+                robotOtter.channels.length + ((robotOtter.channels.length > 1 ) ? ' channels,' : ' channel,') + '\n' +
+                robotOtter.privateChannels.length + ((robotOtter.privateChannels.length > 1 ) ? ' private chats,' : ' private chat,') + '\n' +
+                robotOtter.servers.length + ((robotOtter.servers.length > 1 ) ? ' servers,' : ' server,') + '\n' +
                 'Up for: ' + msToTime(robotOtter.uptime)
+                );
+}
+
+function info(message, msgText) {
+    robotOtter.sendMessage(message.channel, 
+                'RobotOtter v' + robotOtter.userAgent.version + ' by AtlasTheBot (@tlasthebot)' + '\n' +
+                'Source: https://github.com/AtlasTheBot/RobotOtter-Discord' + '\n' +
+                'Official Chat: https://discord.gg/0w6AYrrMIUfO71oV' + '\n' +
+                'Made with tears and love'
                 );
 }
 
@@ -452,3 +459,11 @@ if (Auth.token !== '') {
 } else {
     console.log('No authentication details found!');
 }
+
+//Graceful exit
+process.stdin.resume();
+
+process.on('SIGINT', function () {
+  console.log('\nGot SIGINT & logged out. Press Control-D to exit.');
+  robotOtter.logout();
+});
