@@ -4,6 +4,10 @@ var Settings = require('./settings.json'); //i have no idea
 var Puns = require('./puns.json'); //So many cat puns you'll be cat-atonic!
 var fs = require('fs'); //rw functionality
 
+//TODO: Create (server) settings if none exist.
+
+var ServerSettings = require('./serverSettings.json') //Per-server settings
+
 var commandSymbol = ((Settings.commandSymbol !== undefined)        ? Settings.commandSymbol : '!');
 var maxDiceTimes  = ((Number.isSafeInteger(Settings.maxDiceTimes)) ? Settings.maxDiceTimes  :  10);
 var maxDiceSides  = ((Number.isSafeInteger(Settings.maxDiceSides)) ? Settings.maxDiceSides  : 256);
@@ -11,30 +15,67 @@ var maxModifier   = ((Number.isSafeInteger(Settings.maxModifier))  ? Settings.ma
 var maxCoinFlips  = ((Number.isSafeInteger(Settings.maxCoinFlips)) ? Settings.maxCoinFlips  :  10);
 
 var subreddit = ((typeof Settings.subreddit === 'boolean') ? Settings.subreddit : false);
-var memes = ((typeof Settings.memes === 'boolean') ? Settings.memes : false); //lad
+var memes = ((typeof Settings.memes === 'object') ? Settings.memes : {
+    "wew": false,
+    "ayy": false,
+    "cat": false,
+    "sad": false,
+    "kms": false,
+    "kys": false,
+    "wakeup": false,
+    "familyFriendly": false
+  }); //lad
 
 //The use of the terniary operator is to check each setting to ensure it's (somewhat) correct.
 //A 'maxDiceSides' of 'apple' is useless
 //So if the setting is invalid, we default to settings that work.
 
 //Variables!
-var helpRegex = /help (\w+)/;
-var wikiRegex = /wiki (\w+)/;
-var punRegex  = /pun (\w+)/;
-var numberRegex = /(\d+)/;     //get number
-var diceRegex = /(\d+)?d(\d+)([-+*/])?(\d+)?d?(\d+)?/; //get numbers from dice string 1d3+5d6 => ['1d3+5d6', '1', '3', '+', '5', '6']
+const helpRegex = /help (\w+)/;
+const wikiRegex = /wiki (\w+)/;
+const punRegex  = /pun (\w+)/;
+const numberRegex = /(\d+)/;     //get number
+const diceRegex = /(\d+)?d(\d+)([-+*/])?(\d+)?d?(\d+)?/; //get numbers from dice string 1d3+5d6 => ['1d3+5d6', '1', '3', '+', '5', '6']
                                                          //                           4d5     => ['4d5'    , '4', '5', undefined, undefined, undefined]
 
+function getCurrentSettings(serverId) {
+    if (ServerSettings.serverId === undefined) return 'Server doesn\'t exist';
     
-console.log('Current Settings:' +
+    var memeSettings = '';
+ 
+    for (var i in ServerSettings.serverId.memes) {
+        memeSettings += '   ' + i + ': ' + ServerSettings.serverId.memes[i] + '\n';
+    }
+    var settingsString = 
+    '\n' + 'Current Settings:' +
+    '\n' + 'commandSymbol: ' + ServerSettings.serverId.commandSymbol +
+    '\n' + 'maxDiceTimes : ' + ServerSettings.serverId.maxDiceTimes +
+    '\n' + 'maxDiceSides : ' + ServerSettings.serverId.maxDiceSides +
+    '\n' + 'maxModifier  : ' + ServerSettings.serverId.maxModifier +
+    '\n' + 'maxCoinFlips : ' + ServerSettings.serverId.maxCoinFlips +
+    '\n' + 'subreddit    : ' + ServerSettings.serverId.subreddit +
+    '\n' + 'memes        : {\n' + memeSettings + '\n}';
+    
+    return settingsString;
+}
+
+var memeSettings = '';
+ 
+for (var i in memes) {
+    memeSettings += '   ' + i + ': ' + memes[i] + '\n';
+}
+    
+console.log('\n=========================================' +
+            '\n' + 'Current Default Settings:' +
             '\n' + 'commandSymbol: ' + commandSymbol +
             '\n' + 'maxDiceTimes : ' + maxDiceTimes +
             '\n' + 'maxDiceSides : ' + maxDiceSides +
             '\n' + 'maxModifier  : ' + maxModifier +
             '\n' + 'maxCoinFlips : ' + maxCoinFlips +
             '\n' + 'subreddit    : ' + subreddit +
-            '\n' + 'memes        : ' + memes + 
-            '\n\n' + 'If any settings are different than the ones in settings.json, then you incorrectly entered them.' + '\n');
+            '\n' + 'memes        : { \n' + memeSettings + 
+            '}\n\n' + 'If any settings are different than the ones in settings.json, then you incorrectly entered them.' +
+            '\n=========================================');
 
 var robotOtter = new Discord.Client();
 
@@ -52,6 +93,8 @@ robotOtter.on("ready", function () {
 robotOtter.on('message', function (message) { //switch is for the weak
     if (message.author.equals(robotOtter.user)) return; //Don't reply to itself
         
+        // COMMANDS
+        
     if (message.content.beginsWith(commandSymbol + 'help')) help(message, message.content);
 
     if (message.content.beginsWith(commandSymbol + 'roll')) roll(message, message.content);
@@ -68,11 +111,13 @@ robotOtter.on('message', function (message) { //switch is for the weak
         
     if (message.content.beginsWith(commandSymbol + 'wiki')) wiki(message, message.content);
     
-    if(message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && memes) { //wew lad
+        //MEMES
+    
+    if(message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && memes.wew) { //wew lad
         robotOtter.sendMessage(message.channel, 'lad');
     }
     
-    if(message.content.toLowerCase().includes('ayy') && !message.content.toLowerCase().includes('lmao') && memes) { //wew lad
+    if(message.content.toLowerCase().includes('ayy') && !message.content.toLowerCase().includes('lmao') && memes.ayy) { //wew lad
         if (message.content.toLowerCase().includes('lmoa')) {
             robotOtter.sendMessage(message.channel, '*lmao');
         } else {
@@ -80,28 +125,34 @@ robotOtter.on('message', function (message) { //switch is for the weak
         }
     }
 
-    if (message.content === 'Cat.' && memes) { //Cat.
+    if (message.content === 'Cat.' && memes.cat) { //Cat.
         robotOtter.sendMessage(message.channel, 'Cat.');
     }
 
-    if (message.content.includes(':(') && memes) { //Don't be sad!
+    if (message.content.includes(':(') && memes.sad) { //Don't be sad!
         robotOtter.sendMessage(message.channel, ':)');
     }
 
-    if ((message.content.includes('kms') || message.content.toLowerCase().includes('kill myself')) && memes) { //don't do it
+    if ((message.content.includes('kms') || message.content.toLowerCase().includes('kill myself')) && memes.kms) { //don't do it
         robotOtter.sendMessage(message.channel, 'http://www.suicidepreventionlifeline.org/');
     }
 
-    if ((message.content.includes('kys') || message.content.toLowerCase().includes('kill yourself')) && memes) { //rude
+    if ((message.content.includes('kys') || message.content.toLowerCase().includes('kill yourself')) && memes.kys) { //rude
         robotOtter.sendMessage(message.channel, 'Wow rude.');
     }
 
-    if (message.content.beginsWith(commandSymbol + 'wakeup') && memes) { //WAKE ME UP INSIDE
+    if (message.content.beginsWith(commandSymbol + 'wakeup') && memes.wakeup) { //WAKE ME UP INSIDE
         robotOtter.sendMessage(message.channel, 'CAN\'T WAKE UP.');
     }
     
-    if ((message.content.includes('fuck') || message.content.includes('bitch') || message.content.includes('shit')) && memes) { //WAKE ME UP INSIDE
+    if ((message.content.includes('fuck') || message.content.includes('bitch') || message.content.includes('shit')) && memes.familyFriendly) { //WAKE ME UP INSIDE
         robotOtter.sendMessage(message.channel, 'This is a family friendly chat, don\'t you ever fucking swear again.');
+    }
+    
+        //MOD COMMANDS
+        
+    if (message.content.beginsWith(commandSymbol + commandSymbol + 'settings') && (message.user/*.role.equals(server mod role)*/ || message.channel/*.name === 'bot-settings'*/)) { //expand dong
+        
     }
 });
 
