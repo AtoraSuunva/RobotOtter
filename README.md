@@ -110,40 +110,49 @@ Brings a help menu or help for a specific command.
 
 # Settings
 
-## "commandSymbol"
+## Changing Settings
+
+First, you either need the "Manage Server" permission OR be in a channel named "bot-settings" (keep in mind anyone with access to that channel can modify settings).
+
+Then, use `prefix(x2)setting` to see settings, `prefix(x2)setting settingName` to see the value for a setting and `prefix(x2)setting settingName newValue` to set a new value.
+
+(prefix(x2) is the prefix twice, so by default you need to write `!!setting`)
+
+###  "prefix"
 `Default: "!"`
 
-The symbol placed before commands. You should only change it if "!" conflicts with another bot.
+The prefix placed before commands. You should only change it if "!" conflicts with another bot.
 
-## "maxDiceTimes"
+###  "maxDiceTimes"
 `Default: 10`
 
 The max amount of times you can roll a dice in one command.
 High values such as 100000 **will** cause RobotOtter to stop responding while it rolls 100000 dice (Trust me).
 
-## "maxDiceSides"
+### "maxDiceSides"
 `Default: 256`
 
 The maximum amount of sides a die can have.
 
-## "maxModifier"
+### "maxModifier"
 `Default: 1000`
 
 The maximum number you can modify (add, substract, multiply, divide) by.
 
-## "maxCoinFlips"
+### "maxCoinFlips"
 `Default: 10`
 
 Maximum amount of times you can flip a coin in one command.
 Probably has the same problem as `!roll` where *really* high values cause it to stop responding.
 
-## "subreddit"
+### "subreddit"
 `Default: false`
 
 You probably don't need to change this unless you want to use !wiki for some reason.
 
-## "memes"
-`Default: false`
+### "memes"
+*A whole bunch of sub-aspects things*
+`Default: true`
 
 Enable/Disable meme replies like ayy (lmao), wew (lad).
 
