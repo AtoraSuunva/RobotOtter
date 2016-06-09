@@ -58,7 +58,7 @@ console.log('\n=========================================' +
 var robotOtter = new Discord.Client();
 
 robotOtter.userAgent.url = "https://github.com/AtlasTheBot/RobotOtter-Discord";
-robotOtter.userAgent.version = "1.0.0";
+robotOtter.userAgent.version = "1.0.1";
 const INVITE_LINK = "https://discordapp.com/oauth2/authorize?client_id=189078347207278593&scope=bot&permissions=0";
 
 robotOtter.on("ready", function() {
@@ -601,7 +601,7 @@ function getCurrentSettings(serverId, setting) {
         var settingsString =
         '```' +
         '\n' + 'Current Settings:' +
-        '\n' + 'prefix: ' + ServerSettings[serverId].prefix +
+        '\n' + 'prefix       : ' + ServerSettings[serverId].prefix +
         '\n' + 'maxDiceTimes : ' + ServerSettings[serverId].maxDiceTimes +
         '\n' + 'maxDiceSides : ' + ServerSettings[serverId].maxDiceSides +
         '\n' + 'maxModifier  : ' + ServerSettings[serverId].maxModifier +
@@ -624,31 +624,31 @@ function getCurrentSettings(serverId, setting) {
 
 function setSetting(serverId, setting, newValue) {
     if (ServerSettings[serverId][setting] !== undefined) {
-
+        let response = '';
         if (typeof ServerSettings[serverId][setting] === 'string') {
             if (typeof newValue === 'string') {
                 ServerSettings[serverId][setting] = newValue;
-                var response = '`' + setting + ' = ' + ServerSettings[serverId][setting] + '`';
+                response = '`' + setting + ' = ' + ServerSettings[serverId][setting] + '`';
             } else {
-                var response = 'You need a string';
+                response = 'You need a string';
             }
         } else 
 
         if (typeof ServerSettings[serverId][setting] === 'boolean') {
             if (newValue.toLowerCase() == 'true' || newValue.toLowerCase() == 'false') {
                 ServerSettings[serverId][setting] = (newValue == 'true');
-                var response = '`' + setting + ' = ' + ServerSettings[serverId][setting] + '`';
+                response = '`' + setting + ' = ' + ServerSettings[serverId][setting] + '`';
             } else {
-                var response = 'You need a true/false value';
+                response = 'You need a true/false value';
             }
         } else
 
         if (typeof ServerSettings[serverId][setting] === 'number') {
-            if (typeof newValue === 'number') {
+            if (!isNaN(parseInt(newValue, 10))) {
                 ServerSettings[serverId][setting] = (parseInt(newValue, 10));
-                var response = '`' + setting + ' = ' + ServerSettings[serverId][setting] + '`';
+                response = '`' + setting + ' = ' + ServerSettings[serverId][setting] + '`';
             } else {
-                var response = 'You need a number';
+                response = 'You need a number';
             }
         }
         
@@ -656,13 +656,13 @@ function setSetting(serverId, setting, newValue) {
 
         if (newValue.toLowerCase() == 'true' || newValue.toLowerCase() == 'false') {
             ServerSettings[serverId].memes[setting] = (newValue == 'true');
-            var response = '`' + (newValue == 'true') + ' = ' + ServerSettings[serverId].memes[setting] + '`';
+            response = '`' + setting + ' = ' + ServerSettings[serverId].memes[setting] + '`';
         } else {
-            var response = 'You need a true/false value';
+            response = 'You need a true/false value';
         }
 
     } else {
-        var respsonse = '`No setting was found.`';
+        response = '`No setting was found.`';
     }
 
     fs.writeFile('./serverSettings.json', JSON.stringify(ServerSettings, null, 4), function (err) {
