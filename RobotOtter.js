@@ -58,7 +58,7 @@ console.log('\n=========================================' +
 var robotOtter = new Discord.Client();
 
 robotOtter.userAgent.url = "https://github.com/AtlasTheBot/RobotOtter-Discord";
-robotOtter.userAgent.version = "1.0.1";
+robotOtter.userAgent.version = "1.0.2";
 const INVITE_LINK = "https://discordapp.com/oauth2/authorize?client_id=189078347207278593&scope=bot&permissions=0";
 
 robotOtter.on("ready", function() {

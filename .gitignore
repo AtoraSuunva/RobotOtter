@@ -48,15 +48,11 @@ Temporary Items
 
 # Config Files
 auth.json
-settings.json
 *.sln
 *.user
 *.csproj
 .vs/
 bin/
 obj/
-
-settings.json
-
 run.bat
 serverSettings.json
