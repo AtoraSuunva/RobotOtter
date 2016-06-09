@@ -624,7 +624,7 @@ function getCurrentSettings(serverId, setting) {
 
 function setSetting(serverId, setting, newValue) {
     if (ServerSettings[serverId][setting] !== undefined) {
-        let response = '';
+        var response = '';
         if (typeof ServerSettings[serverId][setting] === 'string') {
             if (typeof newValue === 'string') {
                 ServerSettings[serverId][setting] = newValue;
