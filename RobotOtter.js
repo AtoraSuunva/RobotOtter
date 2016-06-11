@@ -1,10 +1,14 @@
+/*jshint esversion: 6 */
+/*jshint evil: true*/
+//MUAHAHAHAHA I'M EVIL
+
 const Discord = require('discord.js'); //Handles the API
 const Auth = require('./auth.json'); //Auth details
 const Settings = require('./settings.json'); //i have no idea
 const Puns = require('./puns.json'); //So many cat puns you'll be cat-atonic!
 const fs = require('fs'); //rw functionality
 
-var ServerSettings = require('./serverSettings.json') //Per-server settings
+var ServerSettings = require('./serverSettings.json'); //Per-server settings
 
 var prefix        = ((Settings.prefix !== undefined)               ? Settings.prefix        : '!');
 var maxDiceTimes  = ((Number.isSafeInteger(Settings.maxDiceTimes)) ? Settings.maxDiceTimes  :  10);
@@ -22,7 +26,7 @@ var memes = ((typeof Settings.memes === 'object') ? Settings.memes : {
     "kys": false,
     "wakeup": false,
     "familyFriendly": false
-  }); //lad
+  });
 
 //The use of the terniary operator is to check each setting to ensure it's (somewhat) correct.
 //A 'maxDiceSides' of 'apple' is useless
@@ -33,16 +37,15 @@ const multiWordRegex = /(\w+)/g;
 const wordRegex = /\s(\w+)/; //the one to rule them all
 const numberRegex = /(\d+)/;     //get number
 const diceRegex = /(\d+)?d(\d+)([-+*/])?(\d+)?d?(\d+)?/; //get numbers from dice string 1d3+5d6 => ['1d3+5d6', '1', '3', '+', '5', '6']
-                                                         //                           4d5     => ['4d5'    , '4', '5', undefined, undefined, undefined]
+                                                         //                             4d5     => ['4d5'    , '4', '5', undefined, undefined, undefined]
 var messagesSeen = 0;
 var messagesServed = 0;
-
 var memeSettings = '';
- 
+
 for (var i in memes) {
     memeSettings += '   ' + i + ': ' + memes[i] + '\n';
 }
-    
+
 console.log('\n=========================================' +
             '\n' + 'Current Default Settings:' +
             '\n' + 'prefix       : ' + prefix +
@@ -51,7 +54,7 @@ console.log('\n=========================================' +
             '\n' + 'maxModifier  : ' + maxModifier +
             '\n' + 'maxCoinFlips : ' + maxCoinFlips +
             '\n' + 'subreddit    : ' + subreddit +
-            '\n' + 'memes        : { \n' + memeSettings + 
+            '\n' + 'memes        : { \n' + memeSettings +
             '}\n\n' + 'If any settings are different than the ones in settings.json, then you incorrectly entered them.' +
             '\n=========================================');
 
@@ -62,24 +65,26 @@ robotOtter.userAgent.version = "1.0.2";
 const INVITE_LINK = "https://discordapp.com/oauth2/authorize?client_id=189078347207278593&scope=bot&permissions=0";
 
 robotOtter.on("ready", function() {
-	console.log('My body is ready! Memeing in: \n' + 
+	console.log('My body is ready! Memeing in: \n' +
                 robotOtter.servers.length + ' servers,\n' +
                 robotOtter.channels.length + ' channels.');
-                
+
     robotOtter.setPlayingGame('!?!help | goo.gl/nNpZYR');
 });
 
 robotOtter.on('message', function(message) { //switch is for the weak
     if (message.author.equals(robotOtter.user) || message.author.bot) return; //Don't reply to itself or bots
 
+    message.content = cleanMessage(message); //Clean stuff between `` so it doesn't bother reading code
+
     var serverId = message.channel.server.id;
 
     createServerSettings(serverId); //Create settings if none exist
 
     messagesSeen++;
-		
+
         // COMMANDS
-        
+
     if (message.content.beginsWith(ServerSettings[serverId].prefix + 'help') || message.content.beginsWith('!?!help')) {
         help(message);
         messagesServed++;
@@ -97,50 +102,50 @@ robotOtter.on('message', function(message) { //switch is for the weak
         messagesServed++;
         return;
     }
-    
+
     if (message.content.beginsWith(ServerSettings[serverId].prefix + 'choose')) {
         choose(message);
         messagesServed++;
         return;
     }
-    
+
     if (message.content.beginsWith(ServerSettings[serverId].prefix + 'pun')) {
         pun(message);
         messagesServed++;
         return;
     }
-    
+
     if (message.content.beginsWith(ServerSettings[serverId].prefix + 'stats')) {
         stats(message);
         messagesServed++;
         return;
     }
-    
+
     if (message.content.beginsWith(ServerSettings[serverId].prefix + 'info')) {
         info(message);
         messagesServed++;
         return;
     }
-    
+
     if (message.content.beginsWith(ServerSettings[serverId].prefix + 'invite')) {
         robotOtter.sendMessage(message.channel, INVITE_LINK);
         messagesServed++;
         return;
     }
-        
+
     if (message.content.beginsWith(ServerSettings[serverId].prefix + 'wiki')) {
         wiki(message);
         messagesServed++;
         return;
     }
-    
+
         //MEMES
-    
+
     if(message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && ServerSettings[serverId].memes.wew) { //wew lad
         robotOtter.sendMessage(message.channel, 'lad');
         messagesServed++;
     }
-    
+
     if (message.content.toLowerCase().includes('ayy') && !message.content.toLowerCase().includes('lmao') && ServerSettings[serverId].memes.ayy) { //wew lad
         if (message.content.toLowerCase().includes('lmoa')) {
             robotOtter.sendMessage(message.channel, '*lmao');
@@ -174,31 +179,31 @@ robotOtter.on('message', function(message) { //switch is for the weak
         robotOtter.sendMessage(message.channel, 'CAN\'T WAKE UP.');
         messagesServed++;
     }
-    
+
     if ((message.content.toLowerCase().includes('fuck') || message.content.toLowerCase().includes('bitch') || message.content.toLowerCase().includes('shit')) && ServerSettings[serverId].memes.familyFriendly) { //don't talk to me or my bot ever again
         robotOtter.sendMessage(message.channel, 'This is a family friendly chat, don\'t you ever fucking swear again.');
         messagesServed++;
     }
-	
+
         //MOD COMMANDS
-        
+
     if (message.content.beginsWith(ServerSettings[serverId].prefix + ServerSettings[serverId].prefix + 'setting') &&
         (userHasPermission(message.channel.server, message.author, 'manageServer') || message.channel.name === 'bot-settings')) { //Nice and long ;)
         setting(message);
         messagesServed++;
         return;
     }
-    
+
     if (message.content.beginsWith('~eval')) {
 
         if (message.author.id !== "74768773940256768") { //ain't nobody else runnin' eval on my watch
-            robotOtter.sendMessage(message.channel, 'Nice try, but no.')
+            robotOtter.sendMessage(message.channel, 'Nice try, but no.');
             return;
         }
 
         var content = message.content.replace('~eval', '');
 
-        console.log('-=-=-=-=-=-=-=-')
+        console.log('-=-=-=-=-=-=-=-');
 
         try {
             var result = eval(content);
@@ -217,7 +222,7 @@ robotOtter.on('serverCreated', function(server) {
 });
 
 function help(message) {
-    console.log('Help! ')
+    console.log('Help! ');
     var serverId = message.channel.server.id;
 
     var commandName = ((message.content.match(wordRegex) !== null) ? message.content.match(wordRegex)[1] : 'No match :(' );
@@ -248,21 +253,21 @@ function help(message) {
                        '\n' + '{itemN}: Items to select from' +
                        '\n' + 'Example: !choose yes, no => -> yes';
             break;
-        
+
         case 'pun':
             helpText = '\n' + 'Formatting: ' + ServerSettings[serverId].prefix + 'pun {*cat*-egory}' +
                        '\n' + '{*cat*-egory}: Kind of puns' +
                        '\n' + 'Example: !pun cat => *Purr*fect = Perfect';
             break;
-            
+
         case 'stats':
             helpText = 'It\'s just ' + ServerSettings[serverId].prefix + 'stats. Nothing more, nothing less.';
             break;
-        
+
         case 'info':
             helpText = 'What more do you want from me?';
             break;
-        
+
         case 'wiki':
             if (!ServerSettings[serverId].subreddit) break; //no
             helpText = '\n' + 'Formatting: ' + ServerSettings[serverId].prefix + 'wiki [page] ' +
@@ -341,7 +346,7 @@ function roll(message) {
         console.log(diceTotal);
     }
 
-    console.log('-----')
+    console.log('-----');
 
     if (symbol !== '' && ((times2 !== '') || (diceSides2 !== ''))) {
         diceString += '= ' + diceTotal + ' ' + symbol + ' ';
@@ -363,9 +368,9 @@ function roll(message) {
                 robotOtter.reply(message, 'You can\'t roll a die 0 or negative time. Try it, I dare you.');
                 return;
             }
-            
+
             var diceTotal2 = 0;
-            var times2 = ((times2 !== '') ? times2 : 1);
+            times2 = ((times2 !== '') ? times2 : 1);
 
             for (i = times2; i > 0; i--) {
                 diceTotal2 += rollDice(diceSides2);
@@ -377,7 +382,7 @@ function roll(message) {
         }
         diceString += '';
     }
-    
+
 
     diceString += '\n' + '=> ' + diceTotal;
 
@@ -410,7 +415,7 @@ function flip(message) {
 
     for (var i = times; i > 0; i--) {
         currentFlip = rollDice(2); //coins are actually dice
-        
+
         if (currentFlip === 1) {
             heads++;
         } else {
@@ -433,40 +438,40 @@ function flip(message) {
 }
 
 function choose(message) {
-  console.log('!choose')
+  console.log('!choose');
   var choices = message.content.replace(/(\s*,\s*)/g, ',').substring(8).split(','); //.filter() ;^)
   choices = choices.filter(function(e) {return e !== '';}); //clear empty values (be glad it's not a one-liner)
-  
+
   if (choices[0] !== undefined && choices.length > 1) {
-    robotOtter.reply(message, '\n-> ' + choices[Math.floor(Math.random()*choices.length)]); 
+    robotOtter.reply(message, '\n-> ' + choices[Math.floor(Math.random()*choices.length)]);
   } else if (choices[0] !== undefined) {
     robotOtter.reply(message, '\n-> Really?');
   } else {
     robotOtter.reply(message, '\n-> Nothing, you gave me no choice. What did you expect?');
   }
-  
+
   //Sometimes you need to be concise
   //Because nobody else will see your code :(
   //But maybe that's a good thing :)
-  console.log('-----')
+  console.log('-----');
 }
 
 function pun(message) {
-  console.log('!pun')
+  console.log('!pun');
   var category = message.content.match(wordRegex)[1];
-  
+
   console.log(category);
-  
+
   if (Puns[category] !== undefined) {
-    robotOtter.reply(message, Puns[category][Math.floor(Math.random() * Puns[category].length)]); 
+    robotOtter.reply(message, Puns[category][Math.floor(Math.random() * Puns[category].length)]);
   } else {
     robotOtter.reply(message, Puns['default'][Math.floor(Math.random() * Puns['default'].length)]);
   }
-  console.log('-----')
+  console.log('-----');
 }
 
 function stats(message) {
-    robotOtter.sendMessage(message.channel, 
+  robotOtter.sendMessage(message.channel,
                 'Currently serving:' + '\n' +
                 robotOtter.servers.length + ((robotOtter.servers.length !== 1 ) ? ' servers,' : ' server,') + '\n' +
                 robotOtter.users.length + ((robotOtter.users.length !== 1 ) ? ' users,' : ' user,') + '\n' +
@@ -478,7 +483,7 @@ function stats(message) {
 }
 
 function info(message) {
-    robotOtter.sendMessage(message.channel, 
+    robotOtter.sendMessage(message.channel,
                 'RobotOtter v' + robotOtter.userAgent.version + ' by AtlasTheBot (@Atlas)' + '\n' +
                 'Source: https://github.com/AtlasTheBot/RobotOtter-Discord' + '\n' +
                 'Official Chat: https://discord.gg/0w6AYrrMIUfO71oV' + '\n' +
@@ -508,7 +513,7 @@ function wiki(message) {
             robotOtter.reply(message, 'Locations List: https://reddit.com/r/OtterDnD/wiki/locations');
             break;
         default:
-            robotOtter.reply(message, 'Wiki: https://reddit.com/r/OtterDnD/wiki')
+            robotOtter.reply(message, 'Wiki: https://reddit.com/r/OtterDnD/wiki');
     }
     console.log('-----');
 }
@@ -523,20 +528,21 @@ function setting(message) {
         var setting = message.content.split(' '); //["setting", "[setting]", "[value]"]
 
         console.log(setting);
+        var currentSettings = '';
 
         if (setting[2] !== undefined) { //all args supplied
             console.log('Setting ' + setting[1]);
-            var currentSettings = setSetting(serverId, setting[1], setting[2]);
+            currentSettings = setSetting(serverId, setting[1], setting[2]);
             robotOtter.sendMessage(message.channel, currentSettings);
 
         } else if (setting[1] !== undefined) { //"[setting]" supplied
             console.log('Getting ' + setting[1]);
-            var currentSettings = getCurrentSettings(serverId, setting[1]);
+            currentSettings = getCurrentSettings(serverId, setting[1]);
             robotOtter.sendMessage(message.channel, currentSettings);
 
         } else { //No args supplied
             console.log('Getting all settings');
-            var currentSettings = getCurrentSettings(serverId);
+            currentSettings = getCurrentSettings(serverId);
             robotOtter.sendMessage(message.channel, currentSettings + '\nChange settings with `' + ServerSettings[serverId].prefix + ServerSettings[serverId].prefix + 'setting [setting] [newValue]`.');
         }
     }
@@ -546,6 +552,19 @@ function setting(message) {
 
 String.prototype.beginsWith = function (string) {
     return (this.indexOf(string) === 0);
+};
+
+const thingsToClean = [/`{1,}\n?(.*\n?)*`{1,}/]; //In case I want to expand the black list later
+//HORRIBLE CONFUSING REGEX GO!
+
+function cleanMessage(message) { //wosh your code
+  var cleanContent = message.content; //wow well done look at the effort
+
+  for (i = 0; i <= thingsToClean.length; i++) { //JSHint screams if you declare i (var i)
+      cleanContent = cleanContent.replace(thingsToClean[i], '');
+  }
+
+  return cleanContent;
 }
 
 function rollDice(max) {
@@ -572,7 +591,7 @@ function parseEquation(num1, symbol, num2) { //Does 'num1 symbol num2': prsEqtn(
             break;
 
         default:
-            console.log('Error in parseEquation()!')
+            console.log('Error in parseEquation()!');
     }
     return num1;
 }
@@ -583,9 +602,9 @@ function msToTime(duration) {
         hours      = parseInt((duration/(1000*60*60))%24),
         days       = parseInt((duration/(1000*60*60*24)));
 
-    var timeString = ((days >= 1)    ? ((days    > 1) ? days    + ' Days '   : days    + ' Day ')    : '') + 
-                     ((hours >= 1)   ? ((hours   > 1) ? hours   + ' Hours '  : hours   + ' Hour ')   : '') + 
-                     ((minutes >= 1) ? ((minutes > 1) ? minutes + ' Minutes ': minutes + ' Minutes '): '') + 
+    var timeString = ((days >= 1)    ? ((days    > 1) ? days    + ' Days '   : days    + ' Day ')    : '') +
+                     ((hours >= 1)   ? ((hours   > 1) ? hours   + ' Hours '  : hours   + ' Hour ')   : '') +
+                     ((minutes >= 1) ? ((minutes > 1) ? minutes + ' Minutes ': minutes + ' Minutes '): '') +
                      ((seconds >= 1) ? ((seconds > 1) ? seconds + ' Seconds' : seconds + ' Second')  : '');
 
     return timeString;
@@ -623,8 +642,9 @@ function getCurrentSettings(serverId, setting) {
 }
 
 function setSetting(serverId, setting, newValue) {
+  //WOoOoOo it's a wave!
+  var response = '';
     if (ServerSettings[serverId][setting] !== undefined) {
-        var response = '';
         if (typeof ServerSettings[serverId][setting] === 'string') {
             if (typeof newValue === 'string') {
                 ServerSettings[serverId][setting] = newValue;
@@ -632,7 +652,7 @@ function setSetting(serverId, setting, newValue) {
             } else {
                 response = 'You need a string';
             }
-        } else 
+        } else
 
         if (typeof ServerSettings[serverId][setting] === 'boolean') {
             if (newValue.toLowerCase() == 'true' || newValue.toLowerCase() == 'false') {
@@ -651,7 +671,7 @@ function setSetting(serverId, setting, newValue) {
                 response = 'You need a number';
             }
         }
-        
+
     } else if (ServerSettings[serverId].memes[setting] !== undefined) {
 
         if (newValue.toLowerCase() == 'true' || newValue.toLowerCase() == 'false') {
@@ -688,11 +708,11 @@ function createServerSettings(serverId) {
                 console.log('Settings Created');
             }
         });
-    };
+    }
 }
 
 function userHasPermission(server, user, permisssion) {
-    console.log('===')
+    console.log('===');
 
     var roles = server.detailsOfUser(user).roles; //Array of roles
 
@@ -713,12 +733,12 @@ function userHasPermission(server, user, permisssion) {
 if (Auth.token !== '') {
   console.log('Logged in with token!');
   robotOtter.loginWithToken(Auth.token);
-  
+
 } else if (Auth.email !== '' && Auth.password !== '') {
   robotOtter.login(Auth.email, Auth.password, function (error, token) {
     console.log('Logged in with email + pass!');
     Auth.token = token;
-    
+
     fs.writeFile('./auth.json', JSON.stringify(Auth, null, 4), function(err) {
       if(err) {
         console.log(err + '\n===\nError while saving token');
@@ -726,15 +746,14 @@ if (Auth.token !== '') {
         console.log('Token saved');
       }
     });
-    
+
   });
-  
 } else {
     console.log('No authentication details found!');
     process.exit(1);
 }
 
-//Graceful exit
+//Graceful exit (Like a whale)
 process.stdin.resume();
 
 process.on('SIGINT', function() {
