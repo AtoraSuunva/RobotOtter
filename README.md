@@ -48,7 +48,7 @@ Rolls a dice. Follows [dice notation](https://en.wikipedia.org/wiki/Dice_notatio
 
 *Example: !roll 2d20 =>*
 
-    {8} + {14} 
+    {8} + {14}
     = 22
 
 *!roll d20-d3 =>*
@@ -104,7 +104,7 @@ Brings a help menu or help for a specific command.
 
 *Example: !help flip =>*
 
-    Formatting: !flip {times} 
+    Formatting: !flip {times}
     {times}: Number of coin flips (max. 10)
     Example: !flip 2 => {T} + {H} = [H = 1] : [T = 1]
 
@@ -152,11 +152,14 @@ You probably don't need to change this unless you want to use !wiki for some rea
 
 ### "memes"
 *A whole bunch of sub-aspects things*
+
 `Default: true`
 
 Enable/Disable meme replies like ayy (lmao), wew (lad).
 
 ## License
-i dunno i have no idea what each license does so i'll just leave this with no license.
+Whoever uses this project (The USER) must agree to never hit Atlas (The AUTHOR) with a cactus. Or insert said cactus into any orifices. The AUTHOR may request the USER at any time to "Never talk to me or my bot ever again." or to "Drop and give me 20". The USER must also admit to the AUTHOR that otters are "pretty neat animals" when asked about them. Any and all violation of these clauses will allow the AUTHOR to take one (1) soul from the offending USER. These clauses extend for as long as the bot is in use, so not even through death can the USER excape the AUTHOR.
 
-So do whatever you want with this, copy it, print it, make art with it. Just give me credit because not doing so is immoral.
+Also I don't know what any of the licenses mean or be bothered to keep track of who uses it.
+
+Although if you do use this (God knows why), then I'd love to hear about it!
