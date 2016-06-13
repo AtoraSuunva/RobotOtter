@@ -11,7 +11,7 @@ Test it on Discord [here](https://discord.gg/0w6AYrrMIUfO71oV)!
 
 Literally click 4 times.
 
-0. Click [here](https://discordapp.com/oauth2/authorize?client_id=187027320714952704&scope=bot&permissions=0).
+0. Click [here](https://discordapp.com/oauth2/authorize?client_id=189078347207278593&scope=bot&permissions=0).
 1. Select a server.
 2. Authorize.
 3. gg no re
@@ -20,16 +20,42 @@ Literally click 4 times.
 
 If for some reason you want to host it yourself.
 
-0. Install [Node.js](https://nodejs.org/en/download/)
-1. Install [discord.js](http://discordjs.readthedocs.org/en/latest/installing.html).
-2. Download/Pull RobotOtter (Obviously) and extract it.
-3. Create a Discord account (If you haven't already).
-4. Join the channels you want to use the bot on.
-5. Fill out 'email' and 'password' in authExample.json.
-6. Rename it to auth.json.
-7. Run in command line `node RobotOtter.js` while in the installation folder.
+* Install [Node.js](https://nodejs.org/en/download/)
+* Install [discord.js](http://discordjs.readthedocs.org/en/latest/installing.html).
+* Download/Pull RobotOtter (Obviously) and extract it.
 
-If that doesn't work it's probably my fault.
+### Public Bot
+
+See [here](https://discordapp.com/developers/docs/topics/oauth2#bot-vs-user-accounts), public bots *MUST* use a bot account, not a user account. Also gives the bot a sweet [BOT] tag.
+
+* Register an app [here](https://discordapp.com/developers/applications/me).
+* Create a bot user.
+* Copy the token to `authExample.json`.
+
+It should look like this:
+
+    {
+        "email": "Something@Here.Maybe",
+        "password": "^^this tbh fam",
+        "token": "longstringofrandomcharacters"
+    }
+
+* Rename `authExample.json` to `auth.json`.
+* Read `Run`
+
+### Private Bot
+
+* Create a Discord account (If you haven't already).
+* Join the channels you want to use the bot on.
+* Fill out `email` and `password` in `authExample.json`.
+* Rename it to `auth.json`. 
+* Read `Run`.
+
+### Run
+
+* Run in command line `node RobotOtter.js` while in the installation folder.
+
+If that doesn't work it's probably my fault because I suck at explaining.
 
 # Commands
 
@@ -155,11 +181,15 @@ You probably don't need to change this unless you want to use !wiki for some rea
 
 `Default: true`
 
-Enable/Disable meme replies like ayy (lmao), wew (lad).
+An array (list) of meme settings. Enable/Disable by changing each one to true/false.
 
 ## License
 Whoever uses this project (The USER) must agree to never hit Atlas (The AUTHOR) with a cactus. Or insert said cactus into any orifices. The AUTHOR may request the USER at any time to "Never talk to me or my bot ever again." or to "Drop and give me 20". The USER must also admit to the AUTHOR that otters are "pretty neat animals" when asked about them. Any and all violation of these clauses will allow the AUTHOR to take one (1) soul from the offending USER. These clauses extend for as long as the bot is in use, so not even through death can the USER excape the AUTHOR.
 
 Also I don't know what any of the licenses mean or be bothered to keep track of who uses it.
 
+<<<<<<< HEAD
 Although if you do use this (God knows why), then I'd love to hear about it!
+=======
+So do whatever you want with this, copy it, print it, make art with it. Just give me credit because not doing so is immoral.
+>>>>>>> master
