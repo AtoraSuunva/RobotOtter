@@ -58,7 +58,9 @@ console.log('\n=========================================' +
             '}\n\n' + 'If any settings are different than the ones in settings.json, then you incorrectly entered them.' +
             '\n=========================================');
 
-var robotOtter = new Discord.Client();
+var robotOtter = new Discord.Client({
+  "autoReconnect": true
+});
 
 robotOtter.userAgent.url = "https://github.com/AtlasTheBot/RobotOtter-Discord";
 robotOtter.userAgent.version = "1.0.4";
