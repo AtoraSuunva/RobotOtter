@@ -130,7 +130,7 @@ robotOtter.on('message', function(message) { //switch is for the weak
   }
 
   if (message.content.beginsWith(ServerSettings[serverId].prefix + 'image')) {
-    setting(message);
+    image(message);
     messagesServed++;
     return;
   }
