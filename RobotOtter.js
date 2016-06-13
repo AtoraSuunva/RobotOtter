@@ -61,7 +61,7 @@ console.log('\n=========================================' +
 var robotOtter = new Discord.Client();
 
 robotOtter.userAgent.url = "https://github.com/AtlasTheBot/RobotOtter-Discord";
-robotOtter.userAgent.version = "1.0.2";
+robotOtter.userAgent.version = "1.0.4";
 const INVITE_LINK = "https://discordapp.com/oauth2/authorize?client_id=189078347207278593&scope=bot&permissions=0";
 
 robotOtter.on("ready", function() {
@@ -73,148 +73,154 @@ robotOtter.on("ready", function() {
 });
 
 robotOtter.on('message', function(message) { //switch is for the weak
-    if (message.author.equals(robotOtter.user) || message.author.bot) return; //Don't reply to itself or bots
+  if (message.author.equals(robotOtter.user) || message.author.bot) return; //Don't reply to itself or bots
 
-    message.content = cleanMessage(message); //Clean stuff between `` so it doesn't bother reading code
+  message.content = cleanMessage(message); //Clean stuff between `` so it doesn't bother reading code
 
-    var serverId = message.channel.server.id;
+  var serverId = message.channel.server.id;
 
-    createServerSettings(serverId); //Create settings if none exist
+  createServerSettings(serverId); //Create settings if none exist
 
-    messagesSeen++;
+  messagesSeen++;
 
-        // COMMANDS
+      // COMMANDS
 
-    if (message.content.beginsWith(ServerSettings[serverId].prefix + 'help') || message.content.beginsWith('!?!help')) {
-        help(message);
-        messagesServed++;
-        return;
+  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'help') || message.content.beginsWith('!?!help')) {
+      help(message);
+      messagesServed++;
+      return;
+  }
+
+  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'roll')) {
+      roll(message);
+      messagesServed++;
+      return;
+  }
+
+  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'flip')) {
+      flip(message);
+      messagesServed++;
+      return;
+  }
+
+  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'choose')) {
+      choose(message);
+      messagesServed++;
+      return;
+  }
+
+  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'pun')) {
+    pun(message);
+    messagesServed++;
+    return;
+  }
+
+  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'stats')) {
+    stats(message);
+    messagesServed++;
+    return;
+  }
+
+  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'info')) {
+    info(message);
+    messagesServed++;
+    return;
+  }
+
+  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'image')) {
+    setting(message);
+    messagesServed++;
+    return;
+  }
+
+  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'invite')) {
+    robotOtter.sendMessage(message.channel, INVITE_LINK);
+    messagesServed++;
+    return;
+  }
+
+  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'wiki')) {
+    wiki(message);
+    messagesServed++;
+    return;
+  }
+
+      //MEMES
+
+  if(message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && ServerSettings[serverId].memes.wew) { //wew lad
+    robotOtter.sendMessage(message.channel, 'lad');
+    messagesServed++;
+  }
+
+  if (message.content.toLowerCase().includes('ayy') && !message.content.toLowerCase().includes('lmao') && ServerSettings[serverId].memes.ayy) { //wew lad
+    if (message.content.toLowerCase().includes('lmoa')) {
+        robotOtter.sendMessage(message.channel, '*lmao');
+    } else {
+        robotOtter.sendMessage(message.channel, 'lmao');
     }
+    messagesServed++;
+  }
 
-    if (message.content.beginsWith(ServerSettings[serverId].prefix + 'roll')) {
-        roll(message);
-        messagesServed++;
-        return;
-    }
+  if (message.content === 'Cat.' && ServerSettings[serverId].memes.cat) { //Cat.
+    robotOtter.sendMessage(message.channel, 'Cat.');
+    messagesServed++;
+  }
 
-    if (message.content.beginsWith(ServerSettings[serverId].prefix + 'flip')) {
-        flip(message);
-        messagesServed++;
-        return;
-    }
+  if (message.content.includes(':(') && ServerSettings[serverId].memes.sad) { //Don't be sad!
+    robotOtter.sendMessage(message.channel, ':)');
+    messagesServed++;
+  }
 
-    if (message.content.beginsWith(ServerSettings[serverId].prefix + 'choose')) {
-        choose(message);
-        messagesServed++;
-        return;
-    }
+  if ((message.content.includes('kms') || message.content.toLowerCase().includes('kill myself')) && ServerSettings[serverId].memes.kms) { //don't do it
+    robotOtter.sendMessage(message.channel, 'http://www.suicidepreventionlifeline.org/');
+    messagesServed++;
+  }
 
-    if (message.content.beginsWith(ServerSettings[serverId].prefix + 'pun')) {
-        pun(message);
-        messagesServed++;
-        return;
-    }
+  if ((message.content.includes('kys') || message.content.toLowerCase().includes('kill yourself')) && ServerSettings[serverId].memes.kys) { //rude
+    robotOtter.sendMessage(message.channel, 'Wow rude.');
+    messagesServed++;
+  }
 
-    if (message.content.beginsWith(ServerSettings[serverId].prefix + 'stats')) {
-        stats(message);
-        messagesServed++;
-        return;
-    }
+  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'wakeup') && ServerSettings[serverId].memes.wakeup) { //WAKE ME UP INSIDE
+    robotOtter.sendMessage(message.channel, 'CAN\'T WAKE UP.');
+    messagesServed++;
+  }
 
-    if (message.content.beginsWith(ServerSettings[serverId].prefix + 'info')) {
-        info(message);
-        messagesServed++;
-        return;
-    }
+  if ((message.content.toLowerCase().includes('fuck') || message.content.toLowerCase().includes('bitch') || message.content.toLowerCase().includes('shit')) && ServerSettings[serverId].memes.familyFriendly) { //don't talk to me or my bot ever again
+    robotOtter.sendMessage(message.channel, 'This is a family friendly chat, don\'t you ever fucking swear again.');
+    messagesServed++;
+  }
 
-    if (message.content.beginsWith(ServerSettings[serverId].prefix + 'invite')) {
-        robotOtter.sendMessage(message.channel, INVITE_LINK);
-        messagesServed++;
-        return;
-    }
+      //MOD COMMANDS
 
-    if (message.content.beginsWith(ServerSettings[serverId].prefix + 'wiki')) {
-        wiki(message);
-        messagesServed++;
-        return;
-    }
+  if (message.content.beginsWith(ServerSettings[serverId].prefix + ServerSettings[serverId].prefix + 'setting') &&
+    (userHasPermission(message.channel.server, message.author, 'manageServer') || message.channel.name === 'bot-settings')) { //Nice and long ;)
+    setting(message);
+    messagesServed++;
+    return;
+  }
 
-        //MEMES
+  if (message.content.beginsWith('~eval')) {
 
-    if(message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && ServerSettings[serverId].memes.wew) { //wew lad
-        robotOtter.sendMessage(message.channel, 'lad');
-        messagesServed++;
-    }
+      if (message.author.id !== "74768773940256768") { //ain't nobody else runnin' eval on my watch
+          robotOtter.sendMessage(message.channel, 'Nice try, but no.');
+          return;
+      }
 
-    if (message.content.toLowerCase().includes('ayy') && !message.content.toLowerCase().includes('lmao') && ServerSettings[serverId].memes.ayy) { //wew lad
-        if (message.content.toLowerCase().includes('lmoa')) {
-            robotOtter.sendMessage(message.channel, '*lmao');
-        } else {
-            robotOtter.sendMessage(message.channel, 'lmao');
-        }
-        messagesServed++;
-    }
+      var content = message.content.replace('~eval', '');
 
-    if (message.content === 'Cat.' && ServerSettings[serverId].memes.cat) { //Cat.
-        robotOtter.sendMessage(message.channel, 'Cat.');
-        messagesServed++;
-    }
+      console.log('-=-=-=-=-=-=-=-');
 
-    if (message.content.includes(':(') && ServerSettings[serverId].memes.sad) { //Don't be sad!
-        robotOtter.sendMessage(message.channel, ':)');
-        messagesServed++;
-    }
+      try {
+          var result = eval(content);
+          console.log(result);
+          robotOtter.sendMessage(message.channel, '`' + result + '`');
+      } catch (err) {
+          console.log(err);
+          robotOtter.sendMessage(message.channel, '`' + err + '`');
+      }
 
-    if ((message.content.includes('kms') || message.content.toLowerCase().includes('kill myself')) && ServerSettings[serverId].memes.kms) { //don't do it
-        robotOtter.sendMessage(message.channel, 'http://www.suicidepreventionlifeline.org/');
-        messagesServed++;
-    }
-
-    if ((message.content.includes('kys') || message.content.toLowerCase().includes('kill yourself')) && ServerSettings[serverId].memes.kys) { //rude
-        robotOtter.sendMessage(message.channel, 'Wow rude.');
-        messagesServed++;
-    }
-
-    if (message.content.beginsWith(ServerSettings[serverId].prefix + 'wakeup') && ServerSettings[serverId].memes.wakeup) { //WAKE ME UP INSIDE
-        robotOtter.sendMessage(message.channel, 'CAN\'T WAKE UP.');
-        messagesServed++;
-    }
-
-    if ((message.content.toLowerCase().includes('fuck') || message.content.toLowerCase().includes('bitch') || message.content.toLowerCase().includes('shit')) && ServerSettings[serverId].memes.familyFriendly) { //don't talk to me or my bot ever again
-        robotOtter.sendMessage(message.channel, 'This is a family friendly chat, don\'t you ever fucking swear again.');
-        messagesServed++;
-    }
-
-        //MOD COMMANDS
-
-    if (message.content.beginsWith(ServerSettings[serverId].prefix + ServerSettings[serverId].prefix + 'setting') &&
-        (userHasPermission(message.channel.server, message.author, 'manageServer') || message.channel.name === 'bot-settings')) { //Nice and long ;)
-        setting(message);
-        messagesServed++;
-        return;
-    }
-
-    if (message.content.beginsWith('~eval')) {
-
-        if (message.author.id !== "74768773940256768") { //ain't nobody else runnin' eval on my watch
-            robotOtter.sendMessage(message.channel, 'Nice try, but no.');
-            return;
-        }
-
-        var content = message.content.replace('~eval', '');
-
-        console.log('-=-=-=-=-=-=-=-');
-
-        try {
-            var result = eval(content);
-            console.log(result);
-            robotOtter.sendMessage(message.channel, '`' + result + '`');
-        } catch (err) {
-            console.log(err);
-            robotOtter.sendMessage(message.channel, '`' + err + '`');
-        }
-
-    }
+  }
 });
 
 robotOtter.on('serverCreated', function(server) {
@@ -478,7 +484,7 @@ function stats(message) {
                 robotOtter.channels.length + ((robotOtter.channels.length !== 1 ) ? ' channels,' : ' channel,') + '\n' +
                 robotOtter.privateChannels.length + ((robotOtter.privateChannels.length !== 1 ) ? ' private chats,' : ' private chat,') + '\n' +
                 'Up for: ' + msToTime(robotOtter.uptime) + '\n' +
-                'Seen ' + messagesSeen + ((messagesSeen !== 1) ? ' messages, ' : ' message, ') + 'served ' + messagesServed + '(' + Math.floor((messagesServed / messagesSeen) * 100) + '%)'
+                'Seen ' + messagesSeen + ((messagesSeen !== 1) ? ' messages, ' : ' message, ') + 'served ' + messagesServed + ' (' + Math.floor((messagesServed / messagesSeen) * 100) + '%)'
                 );
 }
 
@@ -489,6 +495,16 @@ function info(message) {
                 'Official Chat: https://discord.gg/0w6AYrrMIUfO71oV' + '\n' +
                 'Made with tears and love'
                 );
+}
+
+function image(message) {
+  console.log('image');
+  var fileNames = fs.readdirSync('./images'); //Images in a folder called "images" in the same folder as the script
+  //fileNames is an array of file names
+
+  var fileChosen = fileNames[Math.floor(Math.random() * fileNames.length)]; //Randomly choose one
+
+  robotOtter.sendFile(message.channel, './images/' + fileChosen); //Send the message
 }
 
 function wiki(message) {
@@ -712,21 +728,21 @@ function createServerSettings(serverId) {
 }
 
 function userHasPermission(server, user, permisssion) {
-    console.log('===');
+  console.log('===');
 
-    var roles = server.detailsOfUser(user).roles; //Array of roles
+  var roles = server.detailsOfUser(user).roles; //Array of roles
 
-    var hasRole = false;
+  var hasRole = false;
 
-    for (var roleIndex = 0; roleIndex < roles.length; roleIndex++) {
-        if (roles[roleIndex].hasPermission(permisssion)) {
-            hasRole = true;
-        }
-    }
+  for (var roleIndex = 0; roleIndex < roles.length; roleIndex++) {
+      if (roles[roleIndex].hasPermission(permisssion)) {
+          hasRole = true;
+      }
+  }
 
-    console.log(user.username + ' in server ' + server.name + ' has permission ' + permisssion + ': ' + hasRole);
+  console.log(user.username + ' in server ' + server.name + ' has permission ' + permisssion + ': ' + hasRole);
 
-    return hasRole;
+  return hasRole;
 }
 //Login stuff
 
@@ -749,8 +765,8 @@ if (Auth.token !== '') {
 
   });
 } else {
-    console.log('No authentication details found!');
-    process.exit(1);
+  console.log('No authentication details found!');
+  process.exit(1);
 }
 
 //Graceful exit (Like a whale)
