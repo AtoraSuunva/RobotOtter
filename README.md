@@ -188,8 +188,4 @@ Whoever uses this project (The USER) must agree to never hit Atlas (The AUTHOR) 
 
 Also I don't know what any of the licenses mean or be bothered to keep track of who uses it.
 
-<<<<<<< HEAD
 Although if you do use this (God knows why), then I'd love to hear about it!
-=======
-So do whatever you want with this, copy it, print it, make art with it. Just give me credit because not doing so is immoral.
->>>>>>> master
