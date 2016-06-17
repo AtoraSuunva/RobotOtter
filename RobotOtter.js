@@ -511,7 +511,7 @@ function image(message) {
 
 function wiki(message) {
     var serverId = message.channel.server.id;
-    if (!ServerSettings[serverId].subreddit) return;
+    if (ServerSettings[serverId].subreddit) return;
     console.log('!Wiki ' + message.content);
     var page = message.content.match(wordRegex)[1];
 
