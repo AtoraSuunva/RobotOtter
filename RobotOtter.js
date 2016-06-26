@@ -7,6 +7,7 @@ const Auth = require('./auth.json'); //Auth details
 const Settings = require('./settings.json'); //i have no idea
 const Puns = require('./puns.json'); //So many cat puns you'll be cat-atonic!
 const fs = require('fs'); //rw functionality
+const Cleverbot = require('cleverbot-node'); //actually not very clever sometimes
 
 var ServerSettings = require('./serverSettings.json'); //Per-server settings
 
@@ -58,12 +59,14 @@ console.log('\n=========================================' +
             '}\n\n' + 'If any settings are different than the ones in settings.json, then you incorrectly entered them.' +
             '\n=========================================');
 
+var cleverOtter = new Cleverbot();
+
 var robotOtter = new Discord.Client({
   "autoReconnect": true
 });
 
 robotOtter.userAgent.url = "https://github.com/AtlasTheBot/RobotOtter-Discord";
-robotOtter.userAgent.version = "1.0.4";
+robotOtter.userAgent.version = "1.1.0";
 const INVITE_LINK = "https://discordapp.com/oauth2/authorize?client_id=189078347207278593&scope=bot&permissions=0";
 
 robotOtter.on("ready", function() {
@@ -149,7 +152,7 @@ robotOtter.on('message', function(message) { //switch is for the weak
 
       //MEMES
 
-  if(message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && ServerSettings[serverId].memes.wew) { //wew lad
+  if (message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && ServerSettings[serverId].memes.wew) { //wew lad
     robotOtter.sendMessage(message.channel, 'lad');
     messagesServed++;
   }
@@ -188,7 +191,9 @@ robotOtter.on('message', function(message) { //switch is for the weak
     messagesServed++;
   }
 
-  if ((message.content.toLowerCase().includes('fuck') || message.content.toLowerCase().includes('bitch') || message.content.toLowerCase().includes('shit')) && ServerSettings[serverId].memes.familyFriendly) { //don't talk to me or my bot ever again
+  if ((message.content.toLowerCase().includes('fuck') || message.content.toLowerCase().includes('bitch') || message.content.toLowerCase().includes('shit')) &&
+       ServerSettings[serverId].memes.familyFriendly) { //don't talk to me or my bot ever again
+
     robotOtter.sendMessage(message.channel, 'This is a family friendly chat, don\'t you ever fucking swear again.');
     messagesServed++;
   }
@@ -204,24 +209,35 @@ robotOtter.on('message', function(message) { //switch is for the weak
 
   if (message.content.beginsWith('~eval')) {
 
-      if (message.author.id !== "74768773940256768") { //ain't nobody else runnin' eval on my watch
-          robotOtter.sendMessage(message.channel, 'Nice try, but no.');
-          return;
-      }
+    if (message.author.id !== "74768773940256768") { //ain't nobody else runnin' eval on my watch
+        robotOtter.sendMessage(message.channel, 'Nice try, but no.');
+        return;
+    }
 
-      var content = message.content.replace('~eval', '');
+    var content = message.content.replace('~eval', '');
 
-      console.log('-=-=-=-=-=-=-=-');
+    console.log('-=-=-=-=-=-=-=-');
 
-      try {
-          var result = eval(content);
-          console.log(result);
-          robotOtter.sendMessage(message.channel, '`' + result + '`');
-      } catch (err) {
-          console.log(err);
-          robotOtter.sendMessage(message.channel, '`' + err + '`');
-      }
+    try {
+        var result = eval(content);
+        console.log(result);
+        robotOtter.sendMessage(message.channel, '`' + result + '`');
+    } catch (err) {
+        console.log(err);
+        robotOtter.sendMessage(message.channel, '`' + err + '`');
+    }
+  }
 
+  if (message.isMentioned(robotOtter.user)) {
+    cleverMessage = message.content.replace(/<@\d*?>,? ?/, ''); //clear mentions of robotOtter
+
+    Cleverbot.prepare(function() {
+      cleverOtter.write(cleverMessage, function (response) {
+       robotOtter.reply(message, response.message); //woo confusing variables
+      });
+    });
+
+    return;
   }
 });
 
@@ -302,7 +318,8 @@ function help(message) {
 						'\n' + ServerSettings[serverId].prefix + 'stats - RobotOtter stats' +
 						'\n' + ServerSettings[serverId].prefix + 'info - Info about RobotOtter' +
 						((ServerSettings[serverId].subreddit) ? ('\n' + ServerSettings[serverId].prefix + 'wiki [page] - Link to the OtterDnD wiki, or link directly to [page] (ie. location, players).') : ('')) +
-						'\n' + '{Required} - [Optional]';
+						'\n' + '{Required} - [Optional]' +
+            '\n' + '@mention me to talk to me!';
     }
 
     robotOtter.reply(message, helpText);
@@ -782,5 +799,6 @@ process.on('SIGINT', function() {
 function exitRobotOtter() {
     robotOtter.logout();
     console.log('\n=-=-=-=-=-=-=-=' +
-                '\nLogged out. Press Control-D to exit.');
+                '\nLogged out.');
+    process.exit(1);
 }
