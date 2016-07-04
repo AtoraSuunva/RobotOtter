@@ -1,5 +1,5 @@
 {
-  "prefix": "~",
+  "prefix": "!",
   "maxDiceTimes" : 10,
   "maxDiceSides" : 256,
   "maxModifier"  : 1000,
