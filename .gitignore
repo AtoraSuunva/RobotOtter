@@ -56,3 +56,5 @@ bin/
 obj/
 run.bat
 serverSettings.json
+*.js~*
+*.json~*

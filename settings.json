@@ -1,5 +1,5 @@
 {
-  "prefix": "~",
+  "prefix": "!",
   "maxDiceTimes" : 10,
   "maxDiceSides" : 256,
   "maxModifier"  : 1000,
@@ -14,5 +14,8 @@
     "kys": true,
     "wakeup": true,
     "familyFriendly": true
+  },
+  "hidden": {
+    "cleverBot": null
   }
 }
