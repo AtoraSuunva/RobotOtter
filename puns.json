@@ -1,8 +1,8 @@
 {
     "default": [
-      "These aren't very *punny*."
+      "These aren't very *punny*. (try `pun cat` instead)"
     ],
-    
+
     "cat": [
       "You've *cat* to be *kitten* me right *meow*.",
       "Meow-*cat*-ptain",

@@ -14,5 +14,8 @@
     "kys": true,
     "wakeup": true,
     "familyFriendly": true
+  },
+  "hidden": {
+    "cleverBot": null
   }
 }
