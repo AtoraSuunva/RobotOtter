@@ -49,18 +49,6 @@ for (var i in memes) {
     memeSettings += '   ' + i + ': ' + memes[i] + '\n';
 }
 
-console.log('\n=========================================' +
-            '\n' + 'Current Default Settings:' +
-            '\n' + 'prefix       : ' + prefix +
-            '\n' + 'maxDiceTimes : ' + maxDiceTimes +
-            '\n' + 'maxDiceSides : ' + maxDiceSides +
-            '\n' + 'maxModifier  : ' + maxModifier +
-            '\n' + 'maxCoinFlips : ' + maxCoinFlips +
-            '\n' + 'subreddit    : ' + subreddit +
-            '\n' + 'memes        : { \n' + memeSettings +
-            '}\n\n' + 'If any settings are different than the ones in settings.json, then you incorrectly entered them.' +
-            '\n=========================================');
-
 var robotOtter = new Discord.Client({
   "autoReconnect": true
 });
@@ -70,11 +58,28 @@ const currentVersion = "1.1.1";
 const INVITE_LINK = "https://discordapp.com/oauth2/authorize?client_id=189078347207278593&scope=bot&permissions=0";
 
 robotOtter.on("ready", function() {
-	console.log('My body is ready! Memeing in: \n' +
+	botLog('My body is ready! Memeing in: \n' +
                 robotOtter.servers.length + ' servers,\n' +
                 robotOtter.channels.length + ' channels.');
 
     robotOtter.setPlayingGame('!?!help | goo.gl/nNpZYR');
+
+    botLog('\n=========================================' +
+                '\n' + 'Current Default Settings:' +
+                '\n' + 'prefix       : ' + prefix +
+                '\n' + 'maxDiceTimes : ' + maxDiceTimes +
+                '\n' + 'maxDiceSides : ' + maxDiceSides +
+                '\n' + 'maxModifier  : ' + maxModifier +
+                '\n' + 'maxCoinFlips : ' + maxCoinFlips +
+                '\n' + 'subreddit    : ' + subreddit +
+                '\n' + 'memes        : { \n' + memeSettings +
+                '}\n\n' + 'If any settings are different than the ones in settings.json, then you incorrectly entered them.' +
+                '\n=========================================');
+});
+
+robotOtter.on('disconnect', () => {
+  botLog('Disconnected... time to kms');
+  process.exit(1);
 });
 
 robotOtter.on('message', function(message) { //switch is for the weak
@@ -234,14 +239,14 @@ robotOtter.on('message', function(message) { //switch is for the weak
 
     var content = message.content.replace('~eval', '');
 
-    console.log('-=-=-=-=-=-=-=-');
+    botLog('-=-=-=-=-=-=-=-');
 
     try {
         var result = eval(content);
-        console.log(result);
+        botLog(result);
         robotOtter.sendMessage(message.channel, '`' + result + '`');
     } catch (err) {
-        console.log(err);
+        botLog(err);
         robotOtter.sendMessage(message.channel, '`' + err + '`');
     }
   }
@@ -266,12 +271,12 @@ robotOtter.on('serverCreated', function(server) {
 });
 
 function help(message) {
-    console.log('Help! ');
+    botLog('Help! ');
 
     var commandName = ((message.content.match(wordRegex) !== null) ? message.content.match(wordRegex)[1] : 'No match :(' );
 
-    console.log(message.content);
-    console.log(commandName);
+    botLog(message.content);
+    botLog(commandName);
 
     var helpText = '';
 
@@ -342,11 +347,11 @@ function help(message) {
     }
 
     robotOtter.reply(message, helpText);
-    console.log('------');
+    botLog('------');
 }
 
 function roll(message) {
-    console.log('Roll ' + message.content + '!');
+    botLog('Roll ' + message.content + '!');
 
     var match = message.content.match(diceRegex);
     if (match === null){
@@ -370,13 +375,13 @@ function roll(message) {
         return;
     }
 
-    console.log('match    : ' + '[' + match + ']');
-    console.log('times    : ' + times);
-    console.log('diceSides : ' + diceSides);
-    console.log('symbol   : ' + symbol);
-    console.log('times2   : ' + times2);
-    console.log('diceSides2: ' + diceSides2);
-    console.log('-----');
+    botLog('match    : ' + '[' + match + ']');
+    botLog('times    : ' + times);
+    botLog('diceSides : ' + diceSides);
+    botLog('symbol   : ' + symbol);
+    botLog('times2   : ' + times2);
+    botLog('diceSides2: ' + diceSides2);
+    botLog('-----');
 
     var diceString = '';
     var diceTotal = 0;
@@ -387,13 +392,13 @@ function roll(message) {
         diceTotal += currentRoll;
         diceString +=  currentRoll + ((i === 1) ? ' ' : ' + ');
 
-        console.log(currentRoll);
-        console.log(i);
-        console.log(diceString);
-        console.log(diceTotal);
+        botLog(currentRoll);
+        botLog(i);
+        botLog(diceString);
+        botLog(diceTotal);
     }
 
-    console.log('-----');
+    botLog('-----');
 
     if (symbol !== '' && ((times2 !== '') || (diceSides2 !== ''))) {
         diceString += '= ' + diceTotal + ' ' + symbol + ' ';
@@ -421,8 +426,8 @@ function roll(message) {
 
             for (i = times2; i > 0; i--) {
                 diceTotal2 += rollDice(diceSides2);
-                console.log(i);
-                console.log(diceTotal2);
+                botLog(i);
+                botLog(diceTotal2);
             }
             diceTotal = parseEquation(diceTotal, symbol, diceTotal2);
             diceString += diceTotal2;
@@ -439,11 +444,11 @@ function roll(message) {
         robotOtter.reply(message, 'Seriously? What did you expect?');
     }
 
-    console.log('-----');
+    botLog('-----');
 }
 
 function flip(message) {
-    console.log('Coin Flip ' + message.content + '!');
+    botLog('Coin Flip ' + message.content + '!');
 
     var match = message.content.match(numberRegex);
     if (match === null) match = [1];
@@ -480,21 +485,21 @@ function flip(message) {
 
         coinString += '(' + ((currentFlip === 1) ? 'H' : 'T' ) + ((i === 1) ? ') ' : ') + ');
 
-        console.log(currentFlip);
-        console.log(i);
-        console.log(coinString);
-        console.log('H = ' + heads);
-        console.log('F = ' + tails);
+        botLog(currentFlip);
+        botLog(i);
+        botLog(coinString);
+        botLog('H = ' + heads);
+        botLog('F = ' + tails);
     }
 
     coinString += '\n' + '= ' + heads + '(H), ' + tails + '(T)';
 
     robotOtter.reply(message, coinString);
-    console.log('-----');
+    botLog('-----');
 }
 
 function choose(message) {
-  console.log('!choose');
+  botLog('!choose');
   var choices = message.content.replace(/(\s*,\s*)/g, ',').substring(8).split(','); //.filter() ;^)
   choices = choices.filter(function(e) {return e !== '';}); //clear empty values (be glad it's not a one-liner)
 
@@ -509,11 +514,11 @@ function choose(message) {
   //Sometimes you need to be concise
   //Because nobody else will see your code :(
   //But maybe that's a good thing :)
-  console.log('-----');
+  botLog('-----');
 }
 
 function pun(message) {
-  console.log('!pun');
+  botLog('!pun');
 
   var category = 'default';
 
@@ -521,14 +526,14 @@ function pun(message) {
     category = message.content.match(wordRegex)[1];
   }
 
-  console.log(category);
+  botLog(category);
 
   if (Puns[category] !== undefined) {
     robotOtter.reply(message, Puns[category][Math.floor(Math.random() * Puns[category].length)]);
   } else {
     robotOtter.reply(message, Puns['default'][Math.floor(Math.random() * Puns['default'].length)]);
   }
-  console.log('-----');
+  botLog('-----');
 }
 
 function stats(message) {
@@ -553,7 +558,7 @@ function info(message) {
 }
 
 function image(message) {
-  console.log('image');
+  botLog('image');
   var fileNames = fs.readdirSync('./images'); //Images in a folder called "images" in the same folder as the script
   //fileNames is an array of file names
 
@@ -564,7 +569,7 @@ function image(message) {
 
 function wiki(message) {
     if (ServerSettings[serverId].subreddit) return;
-    console.log('!Wiki ' + message.content);
+    botLog('!Wiki ' + message.content);
     var page = message.content.match(wordRegex)[1];
 
     var match = ((page !== null) ? page.toLowerCase() : '');
@@ -585,32 +590,32 @@ function wiki(message) {
         default:
             robotOtter.reply(message, 'Wiki: https://reddit.com/r/OtterDnD/wiki');
     }
-    console.log('-----');
+    botLog('-----');
 }
 
 // MOD FUNCTIONS
 
 function setting(message) {
-    console.log('===');
-    console.log('Settings!');
+    botLog('===');
+    botLog('Settings!');
     if (message.content.split(' ') !== null) {
         var setting = message.content.split(' '); //["setting", "[setting]", "[value]"]
 
-        console.log(setting);
+        botLog(setting);
         var currentSettings = '';
 
         if (setting[2] !== undefined) { //all args supplied
-            console.log('Setting ' + setting[1]);
+            botLog('Setting ' + setting[1]);
             currentSettings = setSetting(serverId, setting[1], setting[2]);
             robotOtter.sendMessage(message.channel, currentSettings);
 
         } else if (setting[1] !== undefined) { //"[setting]" supplied
-            console.log('Getting ' + setting[1]);
+            botLog('Getting ' + setting[1]);
             currentSettings = getCurrentSettings(serverId, setting[1]);
             robotOtter.sendMessage(message.channel, currentSettings);
 
         } else { //No args supplied
-            console.log('Getting all settings');
+            botLog('Getting all settings');
             currentSettings = getCurrentSettings(serverId);
             robotOtter.sendMessage(message.channel, currentSettings + '\nChange settings with `' + ServerSettings[serverId].prefix + ServerSettings[serverId].prefix + 'setting [setting] [newValue]`.');
         }
@@ -660,7 +665,7 @@ function parseEquation(num1, symbol, num2) { //Does 'num1 symbol num2': prsEqtn(
             break;
 
         default:
-            console.log('Error in parseEquation()!');
+            botLog('Error in parseEquation()!');
     }
     return num1;
 }
@@ -756,9 +761,9 @@ function setSetting(serverId, setting, newValue) {
 
     fs.writeFile('./serverSettings.json', JSON.stringify(ServerSettings, null, 4), function (err) {
         if (err) {
-            console.log(err + '\n===\nError while creating settings');
+            botLog(err + '\n===\nError while creating settings');
         } else {
-            console.log('Settings Created');
+            botLog('Settings Created');
         }
     });
 
@@ -767,23 +772,23 @@ function setSetting(serverId, setting, newValue) {
 
 function createServerSettings(serverId) {
     if (ServerSettings[serverId] === undefined) {
-        console.log('Server has no settings, creating settings for: ' + serverId);
+        botLog('Server has no settings, creating settings for: ' + serverId);
         ServerSettings[serverId] = Settings;
 
         ServerSettings[serverId].hidden.cleverBot = new Cleverbot();
 
         fs.writeFile('./serverSettings.json', JSON.stringify(ServerSettings, null, 4), function (err) {
             if (err) {
-                console.log(err + '\n===\nError while creating settings');
+                botLog(err + '\n===\nError while creating settings');
             } else {
-                console.log('Settings Created');
+                botLog('Settings Created');
             }
         });
     }
 }
 
 function userHasPermission(server, user, permisssion) {
-  console.log('===');
+  botLog('===');
 
   if (serverId.beginsWith('dm')) return true; //DMs don't need no server manager!
 
@@ -797,32 +802,32 @@ function userHasPermission(server, user, permisssion) {
       }
   }
 
-  console.log(user.username + ' in server ' + server.name + ' has permission ' + permisssion + ': ' + hasRole);
+  botLog(user.username + ' in server ' + server.name + ' has permission ' + permisssion + ': ' + hasRole);
 
   return hasRole;
 }
 //Login stuff
 
 if (Auth.token !== '') {
-  console.log('Logged in with token!');
+  botLog('Logged in with token!');
   robotOtter.loginWithToken(Auth.token);
 
 } else if (Auth.email !== '' && Auth.password !== '') {
   robotOtter.login(Auth.email, Auth.password, function (error, token) {
-    console.log('Logged in with email + pass!');
+    botLog('Logged in with email + pass!');
     Auth.token = token;
 
     fs.writeFile('./auth.json', JSON.stringify(Auth, null, 4), function(err) {
       if(err) {
-        console.log(err + '\n===\nError while saving token');
+        botLog(err + '\n===\nError while saving token');
       } else {
-        console.log('Token saved');
+        botLog('Token saved');
       }
     });
 
   });
 } else {
-  console.log('No authentication details found!');
+  botLog('No authentication details found!');
   process.exit(1);
 }
 
@@ -836,9 +841,17 @@ process.on('SIGINT', function() {
 
 function exitRobotOtter() {
     robotOtter.logout();
-    console.log('\n=-=-=-=-=-=-=-=' +
+    botLog('\n=-=-=-=-=-=-=-=' +
                 '\nLogged out.');
     process.exit(1);
 }
 
 //not 1k yet, still hope for sanity!
+
+
+function botLog(message) { //log a thing to both a channel AND the console
+  console.log(message);
+  if (Auth.logChannel !== undefined && Auth.logChannel !== '') {
+    robotOtter.sendMessage(Auth.logChannel, '```xl\n' + message + '\n```');
+  }
+}

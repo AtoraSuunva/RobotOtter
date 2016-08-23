@@ -15,6 +15,124 @@
             "kys": true,
             "wakeup": true,
             "familyFriendly": true
+        },
+        "hidden": {
+            "cleverBot": null
+        }
+    },
+    "dm74768773940256768": {
+        "prefix": "!",
+        "maxDiceTimes": 10,
+        "maxDiceSides": 256,
+        "maxModifier": 1000,
+        "maxCoinFlips": 10,
+        "subreddit": false,
+        "memes": {
+            "wew": true,
+            "ayy": true,
+            "cat": true,
+            "sad": true,
+            "kms": true,
+            "kys": true,
+            "wakeup": true,
+            "familyFriendly": true
+        },
+        "hidden": {
+            "cleverBot": null
+        }
+    },
+    "211956704798048256": {
+        "prefix": "!",
+        "maxDiceTimes": 10,
+        "maxDiceSides": 256,
+        "maxModifier": 1000,
+        "maxCoinFlips": 10,
+        "subreddit": false,
+        "memes": {
+            "wew": true,
+            "ayy": true,
+            "cat": true,
+            "sad": true,
+            "kms": true,
+            "kys": true,
+            "wakeup": true,
+            "familyFriendly": true
+        },
+        "hidden": {
+            "cleverBot": {
+                "params": {
+                    "stimulus": "",
+                    "start": "y",
+                    "sessionid": "",
+                    "vText8": "",
+                    "vText7": "",
+                    "vText6": "",
+                    "vText5": "",
+                    "vText4": "",
+                    "vText3": "",
+                    "vText2": "",
+                    "icognoid": "wsf",
+                    "icognocheck": "",
+                    "fno": "0",
+                    "prevref": "",
+                    "emotionaloutput": "",
+                    "emotionalhistory": "",
+                    "asbotname": "",
+                    "ttsvoice": "",
+                    "typing": "",
+                    "lineref": "",
+                    "sub": "Say",
+                    "islearning": "1",
+                    "cleanslate": "false"
+                }
+            }
+        }
+    },
+    "110373943822540800": {
+        "prefix": "!",
+        "maxDiceTimes": 10,
+        "maxDiceSides": 256,
+        "maxModifier": 1000,
+        "maxCoinFlips": 10,
+        "subreddit": false,
+        "memes": {
+            "wew": true,
+            "ayy": true,
+            "cat": true,
+            "sad": true,
+            "kms": true,
+            "kys": true,
+            "wakeup": true,
+            "familyFriendly": true
+        },
+        "hidden": {
+            "cleverBot": {
+                "params": {
+                    "stimulus": "",
+                    "start": "y",
+                    "sessionid": "",
+                    "vText8": "",
+                    "vText7": "",
+                    "vText6": "",
+                    "vText5": "",
+                    "vText4": "",
+                    "vText3": "",
+                    "vText2": "",
+                    "icognoid": "wsf",
+                    "icognocheck": "",
+                    "fno": "0",
+                    "prevref": "",
+                    "emotionaloutput": "",
+                    "emotionalhistory": "",
+                    "asbotname": "",
+                    "ttsvoice": "",
+                    "typing": "",
+                    "lineref": "",
+                    "sub": "Say",
+                    "islearning": "1",
+                    "cleanslate": "false"
+                }
+            }
         }
     }
 }
