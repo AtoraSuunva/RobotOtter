@@ -49,20 +49,17 @@ for (var i in memes) {
     memeSettings += '   ' + i + ': ' + memes[i] + '\n';
 }
 
-var robotOtter = new Discord.Client({
-  "autoReconnect": true
-});
+var robotOtter = new Discord.Client();
 
-robotOtter.userAgent.url = "https://github.com/AtlasTheBot/RobotOtter-Discord";
-const currentVersion = "1.1.1";
+const currentVersion = "1.2.0";
 const INVITE_LINK = "https://discordapp.com/oauth2/authorize?client_id=189078347207278593&scope=bot&permissions=0";
 
-robotOtter.on("ready", function() {
+robotOtter.on("ready", () => {
 	console.log('My body is ready! Memeing in: \n' +
-                robotOtter.servers.length + ' servers,\n' +
-                robotOtter.channels.length + ' channels.');
+                robotOtter.guilds.size + ' guilds,\n' +
+                robotOtter.channels.size + ' channels.');
 
-    robotOtter.setPlayingGame('!?!help | goo.gl/nNpZYR');
+    robotOtter.user.setStatus('online', '!?!help | goo.gl/nNpZYR');
 
     console.log('\n=========================================' +
                 '\n' + 'Current Default Settings:' +
@@ -82,13 +79,13 @@ robotOtter.on('disconnect', () => {
   process.exit(1);
 });
 
-robotOtter.on('message', function(message) { //switch is for the weak
+robotOtter.on('message', message => { //switch is for the weak
   if (message.author.equals(robotOtter.user) || message.author.bot) return; //Don't reply to itself or bots
 
   message.content = cleanMessage(message); //Clean stuff between `` so it doesn't bother reading code
 
-  if (message.channel.server !== undefined) {
-    serverId = message.channel.server.id;
+  if (message.guild !== undefined) {
+    serverId = message.guild.id;
   } else {
     serverId = 'dm' + message.author.id; //Settings for DMs (user specific)
   }
@@ -148,7 +145,7 @@ robotOtter.on('message', function(message) { //switch is for the weak
   }
 
   if (message.content.beginsWith(ServerSettings[serverId].prefix + 'invite')) {
-    robotOtter.sendMessage(message.channel, INVITE_LINK);
+    message.channel.sendMessage(INVITE_LINK);
     messagesServed++;
     return;
   }
@@ -162,47 +159,47 @@ robotOtter.on('message', function(message) { //switch is for the weak
       //MEMES
 
   if (message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && ServerSettings[serverId].memes.wew) { //wew lad
-    robotOtter.sendMessage(message.channel, 'lad');
+    message.channel.sendMessage('lad');
     messagesServed++;
     return;
   }
 
   if (message.content.toLowerCase().includes('ayy') && !message.content.toLowerCase().includes('lmao') && ServerSettings[serverId].memes.ayy) { //wew lad
     if (message.content.toLowerCase().includes('lmoa')) {
-        robotOtter.sendMessage(message.channel, '*lmao');
+        message.channel.sendMessage('*lmao');
     } else {
-        robotOtter.sendMessage(message.channel, 'lmao');
+        message.channel.sendMessage('lmao');
     }
     messagesServed++;
     return;
   }
 
   if (message.content === 'Cat.' && ServerSettings[serverId].memes.cat) { //Cat.
-    robotOtter.sendMessage(message.channel, 'Cat.');
+    message.channel.sendMessage('Cat.');
     messagesServed++;
     return;
   }
 
   if (message.content.includes(':(') && ServerSettings[serverId].memes.sad) { //Don't be sad!
-    robotOtter.sendMessage(message.channel, ':)');
+    message.channel.sendMessage(':)');
     messagesServed++;
     return;
   }
 
   if ((message.content.includes('kms') || message.content.toLowerCase().includes('kill myself')) && ServerSettings[serverId].memes.kms) { //don't do it
-    robotOtter.sendMessage(message.channel, 'http://www.suicidepreventionlifeline.org/');
+    message.channel.sendMessage('http://www.suicidepreventionlifeline.org/');
     messagesServed++;
     return;
   }
 
   if ((message.content.includes('kys') || message.content.toLowerCase().includes('kill yourself')) && ServerSettings[serverId].memes.kys) { //rude
-    robotOtter.sendMessage(message.channel, 'Wow rude.');
+    message.channel.sendMessage('Wow rude.');
     messagesServed++;
     return;
   }
 
   if (message.content.beginsWith(ServerSettings[serverId].prefix + 'wakeup') && ServerSettings[serverId].memes.wakeup) { //WAKE ME UP INSIDE
-    robotOtter.sendMessage(message.channel, 'CAN\'T WAKE UP.');
+    message.channel.sendMessage('CAN\'T WAKE UP.');
     messagesServed++;
     return;
   }
@@ -210,54 +207,54 @@ robotOtter.on('message', function(message) { //switch is for the weak
   if ((message.content.toLowerCase().includes('fuck') || message.content.toLowerCase().includes('bitch') || message.content.toLowerCase().includes('shit')) &&
        ServerSettings[serverId].memes.familyFriendly) { //don't talk to me or my bot ever again
 
-    robotOtter.sendMessage(message.channel, 'This is a family friendly chat, don\'t you ever fucking swear again.');
+    message.channel.sendMessage('This is a family friendly chat, don\'t you ever fucking swear again.');
     messagesServed++;
     return;
   }
 
       //MOD COMMANDS
-  if (serverId !== 'dm') { //settings in DMs works differently
-    if (message.content.beginsWith(ServerSettings[serverId].prefix + ServerSettings[serverId].prefix + 'setting') && (userHasPermission(message.channel.server, message.author, 'manageServer') || message.channel.name === 'bot-settings')) { //Nice and long ;)
-      setting(message);
-      messagesServed++;
-      return;
-    }
-  } else {
-    if (message.content.beginsWith(ServerSettings[serverId].prefix + ServerSettings[serverId].prefix + 'setting')) { //no check for DMs
-      setting(message);
-      messagesServed++;
-      return;
+  if (message.content.toLowerCase().beginsWith('!?!setting')) {
+    if (serverId !== 'dm') { //settings in DMs works differently
+      if (message.member.hasPermission('MANAGE_SERVER') || message.channel.name === 'bot-settings') { //Nice and long ;)
+        setting(message);
+        messagesServed++;
+        return;
+      }
+    } else {
+      //no check for DMs
+        setting(message);
+        messagesServed++;
+        return;
     }
   }
-
-  if (message.content.beginsWith('~eval')) {
+  if (message.content.beginsWith('!?!eval')) {
 
     if (message.author.id !== "74768773940256768") { //ain't nobody else runnin' eval on my watch
         return;
     }
 
-    var content = message.content.replace('~eval', '');
+    var content = message.content.replace('!?!eval', '');
 
     console.log('-=-=-=-=-=-=-=-');
 
     try {
         var result = eval(content);
         console.log(result);
-        robotOtter.sendMessage(message.channel, '`' + result + '`');
+        message.channel.sendMessage('`' + result + '`');
     } catch (err) {
         console.log(err);
-        robotOtter.sendMessage(message.channel, '`' + err + '`');
+        message.channel.sendMessage('`' + err + '`');
     }
   }
 
-  if (message.isMentioned(robotOtter.user) || serverId.beginsWith('dm')) {//I forgot .beginsWith I swear I'm retarded sometimes
-    cleverMessage = message.content.replace(/<@\d*?>,? ?/, ''); //clear mentions of robotOtter
+  if (message.mentions.users.exists('id', robotOtter.user.id) || serverId.beginsWith('dm')) {//I forgot .beginsWith I swear I'm retarded sometimes
+    cleverMessage = message.content.replace(/<@\d*?>,? ?/, ''); //clear mentions
 
     if (ServerSettings[serverId].hidden.cleverBot === null) ServerSettings[serverId].hidden.cleverBot = new Cleverbot(); //just in case
 
     Cleverbot.prepare(function() {
         ServerSettings[serverId].hidden.cleverBot.write(cleverMessage, function (response) {
-        robotOtter.reply(message, response.message); //woo confusing variables
+        message.channel.sendMessage(response.message); //woo confusing variables
       });
     });
 
@@ -265,8 +262,9 @@ robotOtter.on('message', function(message) { //switch is for the weak
   }
 });
 
-robotOtter.on('serverCreated', function(server) {
-    createServerSettings(server.id);
+robotOtter.on('serverCreated', server => {
+  console.log('New Server!');
+  createServerSettings(server.id);
 });
 
 function help(message) {
@@ -341,11 +339,12 @@ function help(message) {
 						'\n' + ServerSettings[serverId].prefix + 'stats - RobotOtter stats' +
 						'\n' + ServerSettings[serverId].prefix + 'info - Info about RobotOtter' +
 						((ServerSettings[serverId].subreddit) ? ('\n' + ServerSettings[serverId].prefix + 'wiki [page] - Link to the OtterDnD wiki, or link directly to [page] (ie. location, players).') : ('')) +
+            '\n' + '!?!settings - View settings' +
 						'\n' + '{Required} - [Optional]' +
             '\n' + '@mention me to talk to me!';
     }
 
-    robotOtter.reply(message, helpText);
+    message.channel.sendMessage(message.author.username + ': ' + helpText);
     console.log('------');
 }
 
@@ -354,7 +353,7 @@ function roll(message) {
 
     var match = message.content.match(diceRegex);
     if (match === null){
-      robotOtter.reply(message, 'Try using dice notation (1d6)');
+      message.channel.sendMessage(message.author.username + ': ' + 'Try using dice notation (1d6)');
       return;
     }
 
@@ -365,12 +364,12 @@ function roll(message) {
     var diceSides2    = ((Number.isSafeInteger(parseInt(match[5], 10))) ? parseInt(match[5], 10) : ''); //defaults to empty
 
     if (times > ServerSettings[serverId].maxDiceTimes || diceSides > ServerSettings[serverId].maxDiceSides) {
-        robotOtter.reply(message, 'Max times you can roll is ' + ServerSettings[serverId].maxDiceTimes + '. Max sides per die is ' + ServerSettings[serverId].maxDiceSides + '.');
+        message.channel.sendMessage(message.author.username + ': ' + 'Max times you can roll is ' + ServerSettings[serverId].maxDiceTimes + '. Max sides per die is ' + ServerSettings[serverId].maxDiceSides + '.');
         return;
     }
 
     if (times <= 0 || diceSides <= 0) { //Hardcoded because it's impossible to roll a dice 0 times, or a 0-sided die. Try it, I dare you.
-        robotOtter.reply(message, 'You can\'t roll a die 0 or negative time. Try it, I dare you.');
+        message.channel.sendMessage(message.author.username + ': ' + 'You can\'t roll a die 0 or negative time. Try it, I dare you.');
         return;
     }
 
@@ -404,19 +403,19 @@ function roll(message) {
 
         if (times2 !== '' && diceSides2 === '') {
             if (times2 > ServerSettings[serverId].maxModifier) {
-                robotOtter.reply(message, 'Max modifier is ' + ServerSettings[serverId].maxModifier + '.');
+                message.channel.sendMessage(message.author.username + ': ' + 'Max modifier is ' + ServerSettings[serverId].maxModifier + '.');
                 return;
             }
             diceTotal = parseEquation(diceTotal, symbol, times2);
             diceString += times2;
         }else {
             if (times2 > ServerSettings[serverId].maxDiceTimes || diceSides2 > ServerSettings[serverId].maxDiceSides) {
-                robotOtter.reply(message, 'Max times you can roll is ' + ServerSettings[serverId].maxDiceTimes + '. Max sides per die is ' + ServerSettings[serverId].maxDiceSides + '.');
+                message.channel.sendMessage(message.author.username + ': ' + 'Max times you can roll is ' + ServerSettings[serverId].maxDiceTimes + '. Max sides per die is ' + ServerSettings[serverId].maxDiceSides + '.');
                 return;
             }
 
             if (times2 <= 0 || diceSides2 <= 0) { //Hardcoded because it's impossible to roll a dice 0 times, or a 0-sided die.
-                robotOtter.reply(message, 'You can\'t roll a die 0 or negative time. Try it, I dare you.');
+                message.channel.sendMessage(message.author.username + ': ' + 'You can\'t roll a die 0 or negative time. Try it, I dare you.');
                 return;
             }
 
@@ -437,10 +436,10 @@ function roll(message) {
 
     diceString += '\n' + '=> ' + diceTotal;
 
-    robotOtter.reply(message, diceString);
+    message.channel.sendMessage(message.author.username + ': ' + diceString);
 
     if (diceSides === 1) {
-        robotOtter.reply(message, 'Seriously? What did you expect?');
+        message.channel.sendMessage(message.author.username + ': ' + 'Seriously? What did you expect?');
     }
 
     console.log('-----');
@@ -454,17 +453,17 @@ function flip(message) {
     var times = ((Number.isSafeInteger(parseInt(match[0], 10))) ? parseInt(match[0], 10) : 1); //gotta be safe
 
     if (times > ServerSettings[serverId].maxCoinFlips) {
-      robotOtter.reply(message, 'Try flipping ' + ServerSettings[serverId].maxCoinFlips + ' times or less.');
+      message.channel.sendMessage(message.author.username + ': ' + 'Try flipping ' + ServerSettings[serverId].maxCoinFlips + ' times or less.');
       return;
     }
 
     if (times === 0) {
-      robotOtter.reply(message, 'I\'m so good at flipping, I\'ve already flipped ***0*** coins!');
+      message.channel.sendMessage(message.author.username + ': ' + 'I\'m so good at flipping, I\'ve already flipped ***0*** coins!');
       return;
     }
 
     if (times < 0) {
-      robotOtter.reply(message, 'Try flipping a physically possible amount of times.');
+      message.channel.sendMessage(message.author.username + ': ' + 'Try flipping a physically possible amount of times.');
       return;
     }
 
@@ -493,7 +492,7 @@ function flip(message) {
 
     coinString += '\n' + '= ' + heads + '(H), ' + tails + '(T)';
 
-    robotOtter.reply(message, coinString);
+    message.channel.sendMessage(message.author.username + ': ' + coinString);
     console.log('-----');
 }
 
@@ -503,11 +502,11 @@ function choose(message) {
   choices = choices.filter(function(e) {return e !== '';}); //clear empty values (be glad it's not a one-liner)
 
   if (choices[0] !== undefined && choices.length > 1) {
-    robotOtter.reply(message, '\n-> ' + choices[Math.floor(Math.random()*choices.length)]);
+    message.channel.sendMessage(message.author.username + ': ' + '\n-> ' + choices[Math.floor(Math.random()*choices.length)]);
   } else if (choices[0] !== undefined) {
-    robotOtter.reply(message, '\n-> Really?');
+    message.channel.sendMessage(message.author.username + ': ' + '\n-> Really?');
   } else {
-    robotOtter.reply(message, '\n-> Nothing, you gave me no choice. What did you expect?');
+    message.channel.sendMessage(message.author.username + ': ' + '\n-> Nothing, you gave me no choice. What did you expect?');
   }
 
   //Sometimes you need to be concise
@@ -528,27 +527,27 @@ function pun(message) {
   console.log(category);
 
   if (Puns[category] !== undefined) {
-    robotOtter.reply(message, Puns[category][Math.floor(Math.random() * Puns[category].length)]);
+    message.channel.sendMessage(message.author.username + ': ' + Puns[category][Math.floor(Math.random() * Puns[category].length)]);
   } else {
-    robotOtter.reply(message, Puns['default'][Math.floor(Math.random() * Puns['default'].length)]);
+    message.channel.sendMessage(message.author.username + ': ' + Puns['default'][Math.floor(Math.random() * Puns['default'].length)]);
   }
   console.log('-----');
 }
 
 function stats(message) {
-  robotOtter.sendMessage(message.channel,
+  message.channel.sendMessage(
                 'Currently serving:' + '\n' +
-                robotOtter.servers.length + ((robotOtter.servers.length !== 1 ) ? ' servers,' : ' server,') + '\n' +
+                robotOtter.guilds.size.length + ((robotOtter.guilds.size !== 1 ) ? ' servers,' : ' server,') + '\n' +
                 robotOtter.users.length + ((robotOtter.users.length !== 1 ) ? ' users,' : ' user,') + '\n' +
                 robotOtter.channels.length + ((robotOtter.channels.length !== 1 ) ? ' channels,' : ' channel,') + '\n' +
-                robotOtter.privateChannels.length + ((robotOtter.privateChannels.length !== 1 ) ? ' private chats,' : ' private chat,') + '\n' +
+                //robotOtter.privateChannels.length + ((robotOtter.privateChannels.length !== 1 ) ? ' private chats,' : ' private chat,') + '\n' + //cant' be bothered to fix right now
                 'Up for: ' + msToTime(robotOtter.uptime) + '\n' +
                 'Seen ' + messagesSeen + ((messagesSeen !== 1) ? ' messages, ' : ' message, ') + 'served ' + messagesServed + ' (' + Math.floor((messagesServed / messagesSeen) * 100) + '%)'
                 );
 }
 
 function info(message) {
-    robotOtter.sendMessage(message.channel,
+    message.channel.sendMessage(
                 'RobotOtter V' + currentVersion + ' by AtlasTheBot (@Atlas)' + '\n' +
                 'Source: https://github.com/AtlasTheBot/RobotOtter-Discord' + '\n' +
                 'Official Chat: https://discord.gg/0w6AYrrMIUfO71oV' + '\n' +
@@ -563,7 +562,7 @@ function image(message) {
 
   var fileChosen = fileNames[Math.floor(Math.random() * fileNames.length)]; //Randomly choose one
 
-  robotOtter.sendFile(message.channel, './images/' + fileChosen); //Send the message
+  message.channel.sendFile('./images/' + fileChosen); //Send the message
 }
 
 function wiki(message) {
@@ -575,19 +574,19 @@ function wiki(message) {
 
     switch (match) {
         case 'items':
-            robotOtter.reply(message, 'Item List: https://reddit.com/r/OtterDnD/wiki/items');
+            message.channel.sendMessage(message.author.username + ': ' + 'Item List: https://reddit.com/r/OtterDnD/wiki/items');
             break;
         case 'quests':
-            robotOtter.reply(message, 'Quest List: https://reddit.com/r/OtterDnD/wiki/quests');
+            message.channel.sendMessage(message.author.username + ': ' + 'Quest List: https://reddit.com/r/OtterDnD/wiki/quests');
             break;
         case 'players':
-            robotOtter.reply(message, 'Players List: https://reddit.com/r/OtterDnD/wiki/players');
+            message.channel.sendMessage(message.author.username + ': ' + 'Players List: https://reddit.com/r/OtterDnD/wiki/players');
             break;
         case 'locations':
-            robotOtter.reply(message, 'Locations List: https://reddit.com/r/OtterDnD/wiki/locations');
+            message.channel.sendMessage(message.author.username + ': ' + 'Locations List: https://reddit.com/r/OtterDnD/wiki/locations');
             break;
         default:
-            robotOtter.reply(message, 'Wiki: https://reddit.com/r/OtterDnD/wiki');
+            message.channel.sendMessage(message.author.username + ': ' + 'Wiki: https://reddit.com/r/OtterDnD/wiki');
     }
     console.log('-----');
 }
@@ -606,17 +605,17 @@ function setting(message) {
         if (setting[2] !== undefined) { //all args supplied
             console.log('Setting ' + setting[1]);
             currentSettings = setSetting(serverId, setting[1], setting[2]);
-            robotOtter.sendMessage(message.channel, currentSettings);
+            message.channel.sendMessage(currentSettings);
 
         } else if (setting[1] !== undefined) { //"[setting]" supplied
             console.log('Getting ' + setting[1]);
             currentSettings = getCurrentSettings(serverId, setting[1]);
-            robotOtter.sendMessage(message.channel, currentSettings);
+            message.channel.sendMessage(currentSettings);
 
         } else { //No args supplied
             console.log('Getting all settings');
             currentSettings = getCurrentSettings(serverId);
-            robotOtter.sendMessage(message.channel, currentSettings + '\nChange settings with `' + ServerSettings[serverId].prefix + ServerSettings[serverId].prefix + 'setting [setting] [newValue]`.');
+            message.channel.sendMessage(currentSettings + '\nChange settings with `!?!setting [setting] [newValue]`.');
         }
     }
 }
@@ -786,71 +785,17 @@ function createServerSettings(serverId) {
     }
 }
 
-function userHasPermission(server, user, permisssion) {
-  console.log('===');
-
-  if (serverId.beginsWith('dm')) return true; //DMs don't need no server manager!
-
-  var roles = server.detailsOfUser(user).roles; //Array of roles
-
-  var hasRole = false;
-
-  for (var roleIndex = 0; roleIndex < roles.length; roleIndex++) {
-      if (roles[roleIndex].hasPermission(permisssion)) {
-          hasRole = true;
-      }
-  }
-
-  console.log(user.username + ' in server ' + server.name + ' has permission ' + permisssion + ': ' + hasRole);
-
-  return hasRole;
-}
 //Login stuff
 
 if (Auth.token !== '') {
   console.log('Logged in with token!');
-  robotOtter.loginWithToken(Auth.token);
-
+  robotOtter.login(Auth.token);
 } else if (Auth.email !== '' && Auth.password !== '') {
-  robotOtter.login(Auth.email, Auth.password, function (error, token) {
-    console.log('Logged in with email + pass!');
-    Auth.token = token;
-
-    fs.writeFile('./auth.json', JSON.stringify(Auth, null, 4), function(err) {
-      if(err) {
-        console.log(err + '\n===\nError while saving token');
-      } else {
-        console.log('Token saved');
-      }
-    });
-
-  });
+  console.log('Logged in with email + pass!');
+  robotOtter.login(Auth.email, Auth.password);
 } else {
   console.log('No authentication details found!');
   process.exit(1);
 }
 
-//Graceful exit (Like a whale)
-process.stdin.resume();
-
-process.on('SIGINT', function() {
-    robotOtter.logout();
-    exitRobotOtter();
-});
-
-function exitRobotOtter() {
-    robotOtter.logout();
-    console.log('\n=-=-=-=-=-=-=-=' +
-                '\nLogged out.');
-    process.exit(1);
-}
-
 //not 1k yet, still hope for sanity!
-
-
-function botLog(message) { //log a thing to both a channel AND the console
-  console.log(message);
-  if (Auth.logChannel !== undefined && Auth.logChannel !== '') {
-    robotOtter.sendMessage(Auth.logChannel, '```xl\n' + message + '\n```');
-  }
-}
