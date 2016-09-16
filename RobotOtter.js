@@ -51,7 +51,7 @@ for (var i in memes) {
 
 var robotOtter = new Discord.Client();
 
-const currentVersion = "1.2.0";
+const currentVersion = "1.2.1";
 const INVITE_LINK = "https://discordapp.com/oauth2/authorize?client_id=189078347207278593&scope=bot&permissions=0";
 
 robotOtter.on("ready", () => {
@@ -537,9 +537,9 @@ function pun(message) {
 function stats(message) {
   message.channel.sendMessage(
                 'Currently serving:' + '\n' +
-                robotOtter.guilds.size.length + ((robotOtter.guilds.size !== 1 ) ? ' servers,' : ' server,') + '\n' +
-                robotOtter.users.length + ((robotOtter.users.length !== 1 ) ? ' users,' : ' user,') + '\n' +
-                robotOtter.channels.length + ((robotOtter.channels.length !== 1 ) ? ' channels,' : ' channel,') + '\n' +
+                robotOtter.guilds.size + ((robotOtter.guilds.size !== 1 ) ? ' servers,' : ' server,') + '\n' +
+                robotOtter.users.size + ((robotOtter.users.size !== 1 ) ? ' users,' : ' user,') + '\n' +
+                robotOtter.channels.size + ((robotOtter.channels.size !== 1 ) ? ' channels,' : ' channel,') + '\n' +
                 //robotOtter.privateChannels.length + ((robotOtter.privateChannels.length !== 1 ) ? ' private chats,' : ' private chat,') + '\n' + //cant' be bothered to fix right now
                 'Up for: ' + msToTime(robotOtter.uptime) + '\n' +
                 'Seen ' + messagesSeen + ((messagesSeen !== 1) ? ' messages, ' : ' message, ') + 'served ' + messagesServed + ' (' + Math.floor((messagesServed / messagesSeen) * 100) + '%)'
