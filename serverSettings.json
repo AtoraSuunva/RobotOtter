@@ -1,6 +1,6 @@
 {
     "167763064513363968": {
-        "prefix": "~",
+        "prefix": "!",
         "maxDiceTimes": 10,
         "maxDiceSides": 256,
         "maxModifier": 1000,
@@ -38,7 +38,47 @@
             "familyFriendly": true
         },
         "hidden": {
-            "cleverBot": null
+            "cleverBot": {
+                "params": {
+                    "stimulus": "no u",
+                    "start": "y",
+                    "sessionid": "WXFTAT49IA",
+                    "vText8": "J'insulte ton maitre?",
+                    "vText7": "non.",
+                    "vText6": "Mi sie podobaja.",
+                    "vText5": "you cuck.",
+                    "vText4": "No you.",
+                    "vText3": "no u.",
+                    "vText2": "What so?",
+                    "icognoid": "wsf",
+                    "icognocheck": "85bd1466bc4957bc1b4b973dc27c6a19",
+                    "fno": "0",
+                    "prevref": "",
+                    "emotionaloutput": "",
+                    "emotionalhistory": "",
+                    "asbotname": "",
+                    "ttsvoice": "",
+                    "typing": "",
+                    "lineref": "",
+                    "sub": "Say",
+                    "islearning": "1",
+                    "cleanslate": "false",
+                    "message": "What so?",
+                    "logurl": "151715305,RVE121468531",
+                    "": "",
+                    "ttsLocMP3": "www.existor.com/tts/doTts.php",
+                    "ttsLocTXT": "",
+                    "ttsLocTXT3": "",
+                    "ttsText": "",
+                    "lineURL": "",
+                    "linePOST": "",
+                    "lineChoices": "",
+                    "lineChoicesAbbrev": "",
+                    "typingData": "",
+                    "divert": "",
+                    "undefined": ""
+                }
+            }
         }
     },
     "211956704798048256": {
@@ -131,6 +171,67 @@
                     "sub": "Say",
                     "islearning": "1",
                     "cleanslate": "false"
+                }
+            }
+        }
+    },
+    "dm128694295170514944": {
+        "prefix": "!",
+        "maxDiceTimes": 10,
+        "maxDiceSides": 256,
+        "maxModifier": 1000,
+        "maxCoinFlips": 10,
+        "subreddit": false,
+        "memes": {
+            "wew": true,
+            "ayy": true,
+            "cat": true,
+            "sad": true,
+            "kms": true,
+            "kys": true,
+            "wakeup": true,
+            "familyFriendly": true
+        },
+        "hidden": {
+            "cleverBot": {
+                "params": {
+                    "stimulus": "no u",
+                    "start": "y",
+                    "sessionid": "WXFTAT49IA",
+                    "vText8": "J'insulte ton maitre?",
+                    "vText7": "non.",
+                    "vText6": "Mi sie podobaja.",
+                    "vText5": "you cuck.",
+                    "vText4": "No you.",
+                    "vText3": "no u.",
+                    "vText2": "What so?",
+                    "icognoid": "wsf",
+                    "icognocheck": "85bd1466bc4957bc1b4b973dc27c6a19",
+                    "fno": "0",
+                    "prevref": "",
+                    "emotionaloutput": "",
+                    "emotionalhistory": "",
+                    "asbotname": "",
+                    "ttsvoice": "",
+                    "typing": "",
+                    "lineref": "",
+                    "sub": "Say",
+                    "islearning": "1",
+                    "cleanslate": "false",
+                    "message": "What so?",
+                    "logurl": "151715305,RVE121468531",
+                    "": "",
+                    "ttsLocMP3": "www.existor.com/tts/doTts.php",
+                    "ttsLocTXT": "",
+                    "ttsLocTXT3": "",
+                    "ttsText": "",
+                    "lineURL": "",
+                    "linePOST": "",
+                    "lineChoices": "",
+                    "lineChoicesAbbrev": "",
+                    "typingData": "",
+                    "divert": "",
+                    "undefined": ""
                 }
             }
         }
