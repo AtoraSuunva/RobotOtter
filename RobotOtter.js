@@ -51,7 +51,7 @@ for (var i in memes) {
 
 var robotOtter = new Discord.Client();
 
-const currentVersion = "1.2.1";
+const currentVersion = "1.2.3";
 const INVITE_LINK = "https://discordapp.com/oauth2/authorize?client_id=189078347207278593&scope=bot&permissions=0";
 
 robotOtter.on("ready", () => {
@@ -250,22 +250,15 @@ robotOtter.on('message', message => { //switch is for the weak
   if (message.mentions.users.exists('id', robotOtter.user.id) || serverId.beginsWith('dm')) {//I forgot .beginsWith I swear I'm retarded sometimes
     cleverMessage = message.content.replace(/<@\d*?>,? ?/, ''); //clear mentions
 
-    if (ServerSettings[serverId].hidden.cleverBot === undefined) ServerSettings[serverId].hidden.cleverBot = new Cleverbot(); //just in case
-	
-	try {
-		Cleverbot.prepare(() => {
-			ServerSettings[serverId].hidden.cleverBot.write(cleverMessage, function (response) {
-			message.channel.sendMessage(response.message); //woo confusing variables
-			});
-		});
-	} catch (e) {
-		ServerSettings[serverId].hidden.cleverBot = new Cleverbot(); //Create new Cleverbot and use that 
-		Cleverbot.prepare(() => {
-			ServerSettings[serverId].hidden.cleverBot.write(cleverMessage, function (response) {
-			message.channel.sendMessage(response.message); //woo confusing variables
-			});
-		});
+    if (typeof ServerSettings[serverId].hidden.cleverBot.write !== 'function'){
+		ServerSettings[serverId].hidden.cleverBot = new Cleverbot(); //just in case
 	}
+
+	Cleverbot.prepare(() => {
+		ServerSettings[serverId].hidden.cleverBot.write(cleverMessage, (response) => {
+		message.channel.sendMessage(response.message); //woo confusing variables
+		});
+	});
 
     return;
   }
