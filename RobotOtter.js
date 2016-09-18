@@ -250,13 +250,22 @@ robotOtter.on('message', message => { //switch is for the weak
   if (message.mentions.users.exists('id', robotOtter.user.id) || serverId.beginsWith('dm')) {//I forgot .beginsWith I swear I'm retarded sometimes
     cleverMessage = message.content.replace(/<@\d*?>,? ?/, ''); //clear mentions
 
-    if (ServerSettings[serverId].hidden.cleverBot === null) ServerSettings[serverId].hidden.cleverBot = new Cleverbot(); //just in case
-
-    Cleverbot.prepare(function() {
-        ServerSettings[serverId].hidden.cleverBot.write(cleverMessage, function (response) {
-        message.channel.sendMessage(response.message); //woo confusing variables
-      });
-    });
+    if (ServerSettings[serverId].hidden.cleverBot === undefined) ServerSettings[serverId].hidden.cleverBot = new Cleverbot(); //just in case
+	
+	try {
+		Cleverbot.prepare(() => {
+			ServerSettings[serverId].hidden.cleverBot.write(cleverMessage, function (response) {
+			message.channel.sendMessage(response.message); //woo confusing variables
+			});
+		});
+	} catch (e) {
+		ServerSettings[serverId].hidden.cleverBot = new Cleverbot(); //Create new Cleverbot and use that 
+		Cleverbot.prepare(() => {
+			ServerSettings[serverId].hidden.cleverBot.write(cleverMessage, function (response) {
+			message.channel.sendMessage(response.message); //woo confusing variables
+			});
+		});
+	}
 
     return;
   }
