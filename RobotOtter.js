@@ -84,7 +84,7 @@ robotOtter.on('message', message => { //switch is for the weak
 
   message.content = cleanMessage(message); //Clean stuff between `` so it doesn't bother reading code
 
-  if (message.guild !== undefined) {
+  if (message.guild !== null) {
     serverId = message.guild.id;
   } else {
     serverId = 'dm' + message.author.id; //Settings for DMs (user specific)
@@ -214,7 +214,7 @@ robotOtter.on('message', message => { //switch is for the weak
 
       //MOD COMMANDS
   if (message.content.toLowerCase().beginsWith('!?!setting')) {
-    if (serverId !== 'dm') { //settings in DMs works differently
+    if (!serverId.beginsWith('dm')) { //settings in DMs works differently
       if (message.member.hasPermission('MANAGE_SERVER') || message.channel.name === 'bot-settings') { //Nice and long ;)
         setting(message);
         messagesServed++;
