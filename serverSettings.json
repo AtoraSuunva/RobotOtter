@@ -35,7 +35,7 @@
             "kms": true,
             "kys": true,
             "wakeup": true,
-            "familyFriendly": true
+            "familyFriendly": false
         },
         "hidden": {
             "cleverBot": {

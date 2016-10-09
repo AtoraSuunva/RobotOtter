@@ -2,11 +2,12 @@
 /*jshint evil: true*/
 //MUAHAHAHAHA I'M EVIL
 
-const Discord = require('discord.js'); //Handles the API
-const Auth = require('./auth.json'); //Auth details
-const Settings = require('./settings.json'); //i have no idea
-const Puns = require('./puns.json'); //So many cat puns you'll be cat-atonic!
-const fs = require('fs'); //rw functionality
+const Discord   = require('discord.js'); //Handles the API
+const Auth      = require('./auth.json'); //Auth details
+const Settings  = require('./settings.json'); //i have no idea
+const Puns      = require('./puns.json'); //So many cat puns you'll be cat-atonic!
+const fs        = require('fs'); //rw functionality
+const path      = require('path');
 const Cleverbot = require('cleverbot-node'); //actually not very clever sometimes
 
 var ServerSettings = require('./serverSettings.json'); //Per-server settings
@@ -72,6 +73,10 @@ robotOtter.on("ready", () => {
                 '\n' + 'memes        : { \n' + memeSettings +
                 '}\n\n' + 'If any settings are different than the ones in settings.json, then you incorrectly entered them.' +
                 '\n=========================================');
+				
+	setInterval(botLog, 5 * 60000, 'Still alive!');
+	//Log 'Still Alive' to the log channel every 5 minutes
+	//Hopefully this keeps it from timing out and dying
 });
 
 robotOtter.on('disconnect', () => {
@@ -155,6 +160,12 @@ robotOtter.on('message', message => { //switch is for the weak
     messagesServed++;
     return;
   }
+  
+  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'todokete') || message.content.beginsWith(ServerSettings[serverId].prefix + 'とどけて')) {
+    todokete(message);
+    messagesServed++;
+    return;
+  }
 
       //MEMES
 
@@ -187,7 +198,7 @@ robotOtter.on('message', message => { //switch is for the weak
   }
 
   if ((message.content.includes('kms') || message.content.toLowerCase().includes('kill myself')) && ServerSettings[serverId].memes.kms) { //don't do it
-    message.channel.sendMessage('http://www.suicidepreventionlifeline.org/');
+    message.channel.sendMessage('__http://www.suicidepreventionlifeline.org/__');
     messagesServed++;
     return;
   }
@@ -593,6 +604,25 @@ function wiki(message) {
     console.log('-----');
 }
 
+function todokete(message) {
+	console.log('===');
+    console.log('Settings!');
+  if (message.member.voiceChannel === undefined) {
+    message.channel.sendMessage('You need to be in a voice channel!');
+  } else {
+    var fileChosen = randomFile('todokete');
+	console.log(fileChosen)
+    message.member.voiceChannel.join()
+      .then(connection => {
+        const dispatcher = connection.playFile(path.join(__dirname, 'todokete', fileChosen));
+        dispatcher.on('end', () => {
+          message.member.voiceChannel.leave();
+        });
+      })
+      .catch(console.log);
+  }
+}
+
 // MOD FUNCTIONS
 
 function setting(message) {
@@ -682,6 +712,12 @@ function msToTime(duration) {
                      ((seconds >= 1) ? ((seconds > 1) ? seconds + ' Seconds' : seconds + ' Second')  : '');
 
     return timeString;
+}
+
+function randomFile(folder) { //random file from the specified directory
+  var fileNames = fs.readdirSync(path.join(__dirname, folder));
+  var fileChosen = fileNames[Math.floor(Math.random() * fileNames.length)]; //Randomly choose one
+  return fileChosen;
 }
 
 function getCurrentSettings(serverId, setting) {
@@ -785,6 +821,14 @@ function createServerSettings(serverId) {
             }
         });
     }
+}
+
+
+function botLog(message) { //log a thing to both a channel AND the console
+  console.log(message);
+  if (Auth.logChannel !== undefined && Auth.logChannel !== '') {
+    robotOtter.channels.find('id', Auth.logChannel).sendMessage('```xl\n' + message + '\n```');
+  }
 }
 
 //Login stuff
