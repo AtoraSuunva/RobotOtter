@@ -72,6 +72,8 @@ robotOtter.on("ready", () => {
                 '\n' + 'memes        : { \n' + memeSettings +
                 '}\n\n' + 'If any settings are different than the ones in settings.json, then you incorrectly entered them.' +
                 '\n=========================================');
+				
+	setInterval(botLog, 5 * 6000, 'Still alive!');
 });
 
 robotOtter.on('disconnect', () => {
@@ -187,7 +189,7 @@ robotOtter.on('message', message => { //switch is for the weak
   }
 
   if ((message.content.includes('kms') || message.content.toLowerCase().includes('kill myself')) && ServerSettings[serverId].memes.kms) { //don't do it
-    message.channel.sendMessage('http://www.suicidepreventionlifeline.org/');
+    message.channel.sendMessage('__http://www.suicidepreventionlifeline.org/__');
     messagesServed++;
     return;
   }
@@ -785,6 +787,14 @@ function createServerSettings(serverId) {
             }
         });
     }
+}
+
+
+function botLog(message) { //log a thing to both a channel AND the console
+  console.log(message);
+  if (Auth.logChannel !== undefined && Auth.logChannel !== '') {
+    robotOtter.sendMessage(Auth.logChannel, '```xl\n' + message + '\n```');
+  }
 }
 
 //Login stuff
