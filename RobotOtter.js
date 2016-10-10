@@ -98,60 +98,63 @@ robotOtter.on('message', message => { //switch is for the weak
 	createServerSettings(serverId); //Create settings if none exist (also DM settings)
 
     // COMMANDS
-	  
-	var command = message.content.replace(ServerSettings[serverId].prefix, '').split(' ')[0];
 	
-	messagesSeen++;
-	messagesServed++;
-	switch (command) {
-		case 'help':
-		case '!?!help':
-			help(message);
-		break;
+	if (message.content.startsWith(ServerSettings[serverId].prefix)) {
+	
+		var command = message.content.replace(ServerSettings[serverId].prefix, '').split(' ')[0];
 		
-		case 'roll':
-			roll(message);
-		break;
-		
-		case 'flip':
-			flip(message);
-		break;
-		
-		case 'choose':
-			choose(message);
-		break;
-		
-		case 'pun':
-			pun(message);
-		break;
-		
-		case 'stats':
-			stats(message);
-		break;
-		
-		case 'info':
-			info(message);
-		break;
-		
-		case 'image':
-			image(message);
-		break;
-		
-		case 'invite':
-			message.channel.sendMessage(INVITE_LINK);
-		break;
-		
-		case 'wiki':
-			wiki(message);
-		break;
-		
-		case 'todokete':
-		case 'とどけて':
-			todokete(message);
-		break;
-		
-		default:
-			messagesServed--;
+		messagesSeen++;
+		messagesServed++;
+		switch (command) {
+			case 'help':
+			case '!?!help':
+				help(message);
+			break;
+			
+			case 'roll':
+				roll(message);
+			break;
+			
+			case 'flip':
+				flip(message);
+			break;
+			
+			case 'choose':
+				choose(message);
+			break;
+			
+			case 'pun':
+				pun(message);
+			break;
+			
+			case 'stats':
+				stats(message);
+			break;
+			
+			case 'info':
+				info(message);
+			break;
+			
+			case 'image':
+				image(message);
+			break;
+			
+			case 'invite':
+				message.channel.sendMessage(INVITE_LINK);
+			break;
+			
+			case 'wiki':
+				wiki(message);
+			break;
+			
+			case 'todokete':
+			case 'とどけて':
+				todokete(message);
+			break;
+			
+			default:
+				messagesServed--;
+		}
 	}
 
     //MEMES
