@@ -52,7 +52,7 @@ for (var i in memes) {
 
 var robotOtter = new Discord.Client();
 
-const currentVersion = "1.2.3";
+const currentVersion = "1.3.0";
 const INVITE_LINK = "https://discordapp.com/oauth2/authorize?client_id=189078347207278593&scope=bot&permissions=0";
 
 robotOtter.on("ready", () => {
@@ -85,194 +85,179 @@ robotOtter.on('disconnect', () => {
 });
 
 robotOtter.on('message', message => { //switch is for the weak
-  if (message.author.equals(robotOtter.user) || message.author.bot) return; //Don't reply to itself or bots
+	if (message.author.equals(robotOtter.user) || message.author.bot) return; //Don't reply to itself or bots
 
-  message.content = cleanMessage(message); //Clean stuff between `` so it doesn't bother reading code
+	message.content = cleanMessage(message); //Clean stuff between `` so it doesn't bother reading code
 
-  if (message.guild !== null) {
-    serverId = message.guild.id;
-  } else {
-    serverId = 'dm' + message.author.id; //Settings for DMs (user specific)
-  }
-
-  createServerSettings(serverId); //Create settings if none exist (also DM settings)
-
-  messagesSeen++;
-
-      // COMMANDS
-
-  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'help') || message.content.beginsWith('!?!help')) {
-      help(message);
-      messagesServed++;
-      return;
-  }
-
-  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'roll')) {
-      roll(message);
-      messagesServed++;
-      return;
-  }
-
-  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'flip')) {
-      flip(message);
-      messagesServed++;
-      return;
-  }
-
-  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'choose')) {
-      choose(message);
-      messagesServed++;
-      return;
-  }
-
-  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'pun')) {
-    pun(message);
-    messagesServed++;
-    return;
-  }
-
-  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'stats')) {
-    stats(message);
-    messagesServed++;
-    return;
-  }
-
-  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'info')) {
-    info(message);
-    messagesServed++;
-    return;
-  }
-
-  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'image')) {
-    image(message);
-    messagesServed++;
-    return;
-  }
-
-  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'invite')) {
-    message.channel.sendMessage(INVITE_LINK);
-    messagesServed++;
-    return;
-  }
-
-  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'wiki')) {
-    wiki(message);
-    messagesServed++;
-    return;
-  }
-  
-  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'todokete') || message.content.beginsWith(ServerSettings[serverId].prefix + 'とどけて')) {
-    todokete(message);
-    messagesServed++;
-    return;
-  }
-
-      //MEMES
-
-  if (message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && ServerSettings[serverId].memes.wew) { //wew lad
-    message.channel.sendMessage('lad');
-    messagesServed++;
-    return;
-  }
-
-  if (message.content.toLowerCase().includes('ayy') && !message.content.toLowerCase().includes('lmao') && ServerSettings[serverId].memes.ayy) { //wew lad
-    if (message.content.toLowerCase().includes('lmoa')) {
-        message.channel.sendMessage('*lmao');
-    } else {
-        message.channel.sendMessage('lmao');
-    }
-    messagesServed++;
-    return;
-  }
-
-  if (message.content === 'Cat.' && ServerSettings[serverId].memes.cat) { //Cat.
-    message.channel.sendMessage('Cat.');
-    messagesServed++;
-    return;
-  }
-
-  if (message.content.includes(':(') && ServerSettings[serverId].memes.sad) { //Don't be sad!
-    message.channel.sendMessage(':)');
-    messagesServed++;
-    return;
-  }
-
-  if ((message.content.includes('kms') || message.content.toLowerCase().includes('kill myself')) && ServerSettings[serverId].memes.kms) { //don't do it
-    message.channel.sendMessage('__http://www.suicidepreventionlifeline.org/__');
-    messagesServed++;
-    return;
-  }
-
-  if ((message.content.includes('kys') || message.content.toLowerCase().includes('kill yourself')) && ServerSettings[serverId].memes.kys) { //rude
-    message.channel.sendMessage('Wow rude.');
-    messagesServed++;
-    return;
-  }
-
-  if (message.content.beginsWith(ServerSettings[serverId].prefix + 'wakeup') && ServerSettings[serverId].memes.wakeup) { //WAKE ME UP INSIDE
-    message.channel.sendMessage('CAN\'T WAKE UP.');
-    messagesServed++;
-    return;
-  }
-
-  if ((message.content.toLowerCase().includes('fuck') || message.content.toLowerCase().includes('bitch') || message.content.toLowerCase().includes('shit')) &&
-       ServerSettings[serverId].memes.familyFriendly) { //don't talk to me or my bot ever again
-
-    message.channel.sendMessage('This is a family friendly chat, don\'t you ever fucking swear again.');
-    messagesServed++;
-    return;
-  }
-
-      //MOD COMMANDS
-  if (message.content.toLowerCase().beginsWith('!?!setting')) {
-    if (!serverId.beginsWith('dm')) { //settings in DMs works differently
-      if (message.member.hasPermission('MANAGE_SERVER') || message.channel.name === 'bot-settings') { //Nice and long ;)
-        setting(message);
-        messagesServed++;
-        return;
-      }
-    } else {
-      //no check for DMs
-        setting(message);
-        messagesServed++;
-        return;
-    }
-  }
-  if (message.content.beginsWith('!?!eval')) {
-
-    if (message.author.id !== "74768773940256768") { //ain't nobody else runnin' eval on my watch
-        return;
-    }
-
-    var content = message.content.replace('!?!eval', '');
-
-    console.log('-=-=-=-=-=-=-=-');
-
-    try {
-        var result = eval(content);
-        console.log(result);
-        message.channel.sendMessage('`' + result + '`');
-    } catch (err) {
-        console.log(err);
-        message.channel.sendMessage('`' + err + '`');
-    }
-  }
-
-  if (message.mentions.users.exists('id', robotOtter.user.id) || serverId.beginsWith('dm')) {//I forgot .beginsWith I swear I'm retarded sometimes
-    cleverMessage = message.content.replace(/<@\d*?>,? ?/, ''); //clear mentions
-
-    if (typeof ServerSettings[serverId].hidden.cleverBot.write !== 'function'){
-		ServerSettings[serverId].hidden.cleverBot = new Cleverbot(); //just in case
+	if (message.guild !== null) {
+		serverId = message.guild.id;
+	} else {
+		serverId = 'dm' + message.author.id; //Settings for DMs (user specific)
 	}
 
-	Cleverbot.prepare(() => {
-		ServerSettings[serverId].hidden.cleverBot.write(cleverMessage, (response) => {
-		message.channel.sendMessage(response.message); //woo confusing variables
-		});
-	});
+	createServerSettings(serverId); //Create settings if none exist (also DM settings)
 
-    return;
-  }
+    // COMMANDS
+	  
+	var command = message.content.replace(ServerSettings[serverId].prefix, '').split(' ')[0];
+	
+	messagesSeen++;
+	messagesServed++;
+	switch (command) {
+		case 'help':
+		case '!?!help':
+			help(message);
+		break;
+		
+		case 'roll':
+			roll(message);
+		break;
+		
+		case 'flip':
+			flip(message);
+		break;
+		
+		case 'choose':
+			choose(message);
+		break;
+		
+		case 'pun':
+			pun(message);
+		break;
+		
+		case 'stats':
+			stats(message);
+		break;
+		
+		case 'info':
+			info(message);
+		break;
+		
+		case 'image':
+			image(message);
+		break;
+		
+		case 'invite':
+			message.channel.sendMessage(INVITE_LINK);
+		break;
+		
+		case 'wiki':
+			wiki(message);
+		break;
+		
+		case 'todokete':
+		case 'とどけて':
+			todokete(message);
+		break;
+	}
+
+    //MEMES
+
+	if (message.content.toLowerCase().includes('wew') && !message.content.toLowerCase().includes('lad') && ServerSettings[serverId].memes.wew) { //wew lad
+		message.channel.sendMessage('lad');
+		messagesServed++;
+		return;
+	}
+
+	if (message.content.toLowerCase().includes('ayy') && !message.content.toLowerCase().includes('lmao') && ServerSettings[serverId].memes.ayy) { //wew lad
+		if (message.content.toLowerCase().includes('lmoa')) {
+			message.channel.sendMessage('*lmao');
+		} else {
+			message.channel.sendMessage('lmao');
+		}
+		messagesServed++;
+		return;
+	}
+
+	if (message.content === 'Cat.' && ServerSettings[serverId].memes.cat) { //Cat.
+		message.channel.sendMessage('Cat.');
+		messagesServed++;
+		return;
+	}
+
+	if (message.content.includes(':(') && ServerSettings[serverId].memes.sad) { //Don't be sad!
+		message.channel.sendMessage(':)');
+		messagesServed++;
+		return;
+	}
+
+	if ((message.content.includes('kms') || message.content.toLowerCase().includes('kill myself')) && ServerSettings[serverId].memes.kms) { //don't do it
+		message.channel.sendMessage('__http://www.suicidepreventionlifeline.org/__');
+		messagesServed++;
+		return;
+	}
+
+	if ((message.content.includes('kys') || message.content.toLowerCase().includes('kill yourself')) && ServerSettings[serverId].memes.kys) { //rude
+		message.channel.sendMessage('Wow rude.');
+		messagesServed++;
+		return;
+	}
+
+	if (message.content.startsWith(ServerSettings[serverId].prefix + 'wakeup') && ServerSettings[serverId].memes.wakeup) { //WAKE ME UP INSIDE
+		message.channel.sendMessage('CAN\'T WAKE UP.');
+		messagesServed++;
+		return;
+	}
+
+	if ((message.content.toLowerCase().includes('fuck') || message.content.toLowerCase().includes('bitch') || message.content.toLowerCase().includes('shit')) &&
+		 ServerSettings[serverId].memes.familyFriendly) { //don't talk to me or my bot ever again
+		
+		message.channel.sendMessage('This is a family friendly chat, don\'t you ever fucking swear again.');
+		messagesServed++;
+		return;
+	}
+
+      //MOD COMMANDS
+	if (message.content.toLowerCase().startsWith('!?!setting')) {
+		if (!serverId.startsWith('dm')) { //settings in DMs works differently
+			if (message.member.hasPermission('MANAGE_GUILD') || message.channel.name === 'bot-settings') { //Nice and long ;)
+				setting(message);
+				messagesServed++;
+				return;
+			}
+		} else {
+			//no check for DMs
+			setting(message);
+			messagesServed++;
+			return;
+		}
+	}
+	
+	if (message.content.startsWith('!?!eval')) {
+
+		if (message.author.id !== "74768773940256768") { //ain't nobody else runnin' eval on my watch
+			return;
+		}
+
+		var content = message.content.replace('!?!eval', '');
+
+		console.log('-=-=-=-=-=-=-=-');
+
+		try {
+			var result = eval(content);
+			console.log(result);
+			message.channel.sendMessage('`' + result + '`');
+		} catch (err) {
+			console.log(err);
+			message.channel.sendMessage('`' + err + '`');
+		}
+	}
+
+	if (message.mentions.users.exists('id', robotOtter.user.id) || serverId.startsWith('dm')) {//I forgot .startsWith I swear I'm retarded sometimes
+		cleverMessage = message.content.replace(/<@\d*?>,? ?/, ''); //clear mentions
+
+		if (typeof ServerSettings[serverId].hidden.cleverBot.write !== 'function'){
+			ServerSettings[serverId].hidden.cleverBot = new Cleverbot(); //just in case
+		}
+
+		Cleverbot.prepare(() => {
+			ServerSettings[serverId].hidden.cleverBot.write(cleverMessage, (response) => {
+			message.channel.sendMessage(response.message); //woo confusing variables
+			});
+		});
+
+		return;
+	}
 });
 
 robotOtter.on('serverCreated', server => {
@@ -636,7 +621,10 @@ function setting(message) {
 
         if (setting[2] !== undefined) { //all args supplied
             console.log('Setting ' + setting[1]);
-            currentSettings = setSetting(serverId, setting[1], setting[2]);
+			
+			var newSetting = setting.splice(2).join(' ').replace(/['"]/g, '');
+            
+			currentSettings = setSetting(serverId, setting[1], newSetting);
             message.channel.sendMessage(currentSettings);
 
         } else if (setting[1] !== undefined) { //"[setting]" supplied
@@ -653,10 +641,6 @@ function setting(message) {
 }
 
 //EXTRA NON-COMMAND FUNCTIONS
-
-String.prototype.beginsWith = function (string) {
-    return (this.indexOf(string) === 0);
-};
 
 const thingsToClean = [/`{1,}\n?(.*\n?)*`{1,}/]; //In case I want to expand the black list later
 //HORRIBLE CONFUSING REGEX GO!
