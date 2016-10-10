@@ -149,6 +149,9 @@ robotOtter.on('message', message => { //switch is for the weak
 		case 'とどけて':
 			todokete(message);
 		break;
+		
+		default:
+			messagesServed--;
 	}
 
     //MEMES
