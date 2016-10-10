@@ -82,7 +82,7 @@
         }
     },
     "211956704798048256": {
-        "prefix": "!",
+        "prefix": "Please, ",
         "maxDiceTimes": 10,
         "maxDiceSides": 256,
         "maxModifier": 1000,
