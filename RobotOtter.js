@@ -1,3 +1,6 @@
+// don't try to read this it's hell
+// seriously go away
+
 /*jshint esversion: 6 */
 /*jshint evil: true*/
 //MUAHAHAHAHA I'M EVIL
@@ -38,7 +41,7 @@ var memes = ((typeof Settings.memes === 'object') ? Settings.memes : {
 const multiWordRegex = /(\w+)/g;
 const wordRegex = /\s(\w+)/; //the one to rule them all
 const numberRegex = /(-?\d+)/;     //get number
-const diceRegex = /(\d+)?d(\d+)([-+*/])?(\d+)?d?(\d+)?/; //get numbers from dice string 1d3+5d6 => ['1d3+5d6', '1', '3', '+', '5', '6']
+const diceRegex = /(\d+)?d(\d+)([-+*\/])?(\d+)?d?(\d+)?/; //get numbers from dice string 1d3+5d6 => ['1d3+5d6', '1', '3', '+', '5', '6']
                                                          //                             4d5     => ['4d5'    , '4', '5', undefined, undefined, undefined]
 var messagesSeen = 0;
 var messagesServed = 0;
@@ -59,8 +62,8 @@ robotOtter.on("ready", () => {
 	console.log('My body is ready! Memeing in: \n' +
                 robotOtter.guilds.size + ' guilds,\n' +
                 robotOtter.channels.size + ' channels.');
-
-    robotOtter.user.setStatus('online', '!?!help | goo.gl/nNpZYR');
+	
+	robotOtter.user.setGame('in water | !?!help')
 
     console.log('\n=========================================' +
                 '\n' + 'Current Default Settings:' +
@@ -74,7 +77,7 @@ robotOtter.on("ready", () => {
                 '}\n\n' + 'If any settings are different than the ones in settings.json, then you incorrectly entered them.' +
                 '\n=========================================');
 				
-	setInterval(botLog, 5 * 60000, 'Still alive!');
+	//setInterval(botLog, 5 * 60000, 'Still alive!');
 	//Log 'Still Alive' to the log channel every 5 minutes
 	//Hopefully this keeps it from timing out and dying
 });
@@ -107,7 +110,6 @@ robotOtter.on('message', message => { //switch is for the weak
 		messagesServed++;
 		switch (command) {
 			case 'help':
-			case '!?!help':
 				help(message);
 			break;
 			
@@ -213,6 +215,8 @@ robotOtter.on('message', message => { //switch is for the weak
 		return;
 	}
 
+	if (message.content.toLowerCase().startsWith('!?!help')) return help(message)
+	
       //MOD COMMANDS
 	if (message.content.toLowerCase().startsWith('!?!setting')) {
 		if (!serverId.startsWith('dm')) { //settings in DMs works differently
@@ -249,7 +253,7 @@ robotOtter.on('message', message => { //switch is for the weak
 		}
 	}
 
-	if (message.mentions.users.exists('id', robotOtter.user.id) || serverId.startsWith('dm')) {//I forgot .startsWith I swear I'm retarded sometimes
+	if (message.mentions.users.has(robotOtter.user.id) || serverId.startsWith('dm')) {//I forgot .startsWith I swear I'm retarded sometimes
 		cleverMessage = message.content.replace(/<@\d*?>,? ?/, ''); //clear mentions
 
 		if (typeof ServerSettings[serverId].hidden.cleverBot.write !== 'function'){
@@ -817,7 +821,7 @@ function createServerSettings(serverId) {
 function botLog(message) { //log a thing to both a channel AND the console
   console.log(message);
   if (Auth.logChannel !== undefined && Auth.logChannel !== '') {
-    robotOtter.channels.find('id', Auth.logChannel).sendMessage('```xl\n' + message + '\n```');
+    robotOtter.channels.get(Auth.logChannel).sendMessage('```xl\n' + message + '\n```');
   }
 }
 
