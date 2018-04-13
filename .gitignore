@@ -96,5 +96,6 @@ run.bat
 serverSettings.json
 *.js~*
 *.json~*
-serverSettings.json
-serverSettings.json
+yarn.lock
+modules/secret/*
+config.json
