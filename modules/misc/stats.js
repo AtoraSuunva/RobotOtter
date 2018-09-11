@@ -42,7 +42,7 @@ module.exports.events.message = (bot, message) => {
 }
 
 module.exports.events.ready = (bot) => {
-  bot.modules.logger.log(
+  bot.sleet.logger.log(
 `
 Logged in as ${bot.user.username}#${bot.user.discriminator}
 Currently in: ${bot.guilds.size} guilds, ${bot.channels.size} channels

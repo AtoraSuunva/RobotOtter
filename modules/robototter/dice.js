@@ -14,7 +14,7 @@ const maxMod = 1000
 
 module.exports.events = {}
 module.exports.events.message = (bot, message) => {
-  const [cmd, die] = bot.modules.shlex(message)
+  const [cmd, die] = bot.sleet.shlex(message)
   const prefix = (message.member ? message.member.displayName : message.author.username) + ','
   const parse = diceReg.exec(die)
 
@@ -63,14 +63,14 @@ module.exports.events.message = (bot, message) => {
   if (['L', 'H'].includes(mod) && dice === 1)
       return message.channel.send(`${prefix} You'll get no results left then`)
 
-  const modifier = new Array(dice).fill(0).map(v => {
+  const modifier = (() => {
     if (mod === undefined) return 0
     if (['L', 'H'].includes(mod)) return 0
     if (mod2 === undefined) return mod
     return rollDice(mod, mod2).reduce(sum)
-  })
+  })()
 
-  const rolls = rollDice(dice, sides).map((v, i) => safeMath(v, op, modifier[i]))
+  const rolls = rollDice(dice, sides)
   let finalRolls = rolls, dropped
 
   if (['L', 'H'].includes(mod))
@@ -80,7 +80,9 @@ module.exports.events.message = (bot, message) => {
   const occurences = JSON.stringify(countOccurences(finalRolls)).replace(/"/g, '').replace(/([:,])/g, '$1 ')
 
   const msg = prefix + '\n' + finalRolls.join(', ') +
-              `\nFor a total of: ${total}\nAnd here's the count: ${occurences}` +
+              `\nFor a total of: \`${total}` +
+              (modifier ? ` ${op} ${modifier} = ${safeMath(total, op, modifier)}` : '') +
+              `\`\nAnd here's the count: ${occurences}` +
               (dropped ? `\nAnd dropped: ${dropped}` : '')
 
   if (msg.length < 2000)

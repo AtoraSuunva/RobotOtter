@@ -1,33 +1,30 @@
 module.exports.config = {
-  name: 'baninvites',
-  invokers: ['baninvites', 'banrevoke', 'br'],
-  help: 'Checks for invites from just banned users',
-  expandedHelp: 'Whenever someone is banned, it\'ll display all invites they\'ve made (if any) with the option to revoke them.',
-  usage: ['Revoke invites', 'br <id>'],
-  invisible: true
+  name: 'revoke',
+  invokers: ['revoke invites', 'ri', 'revoke'],
+  help: 'Revokes invites from users',
+  expandedHelp: 'Revokes invites using the passed user ID',
+  usage: ['revoke 123456789', 'Revokes the invites made by user X'],
 }
 
+// TODO: Still in WIP so that it's guild-agnostic
+
 const Discord = require('discord.js')
-const botChannels = {} // TODO: make this customizable
 
 module.exports.events = {}
 module.exports.events.message = async (bot, message) => {
-  if (botChannels[message.guild.id] === undefined) return
-  if (!message.guild.member(bot.user).hasPermission('MANAGE_GUILD'))
-    return message.channel.send('I don\'t have `MANAGE_GUILD` perms.')
-  if (!message.member.hasPermission('BAN_MEMBERS'))
-    return message.channel.send('You need to be able to ban members to revoke their invites')
+  if (!message.guild) return
 
-  let args = bot.modules.shlex(message)
+  if (!message.guild.me.permissions.has('MANAGE_GUILD')) return message.channel.send('I don\'t have `MANAGE_GUILD` perms.')
+  if (!message.member.permissions.has('BAN_MEMBERS')) return message.channel.send('You need to be able to ban members to revoke their invites')
 
-  if (args[1] === undefined)
-   return message.channel.send('You need to pass a banned user\'s id')
+  let args = bot.sleet.shlex(message)
+
+  if (args[1] === undefined) return message.channel.send('You need to pass a user id')
 
   let invites = await message.guild.fetchInvites()
   let invitesToRevoke = invites.filter(i => i.inviter.id === args[1])
 
-  if (invitesToRevoke.size === 0)
-  return message.channel.send('No invites to revoke')
+  if (invitesToRevoke.size === 0) return message.channel.send('No (cached) invites to revoke')
 
   let inviteStr = ''
   const inviter = invitesToRevoke.first().inviter
@@ -50,9 +47,11 @@ module.exports.events.message = async (bot, message) => {
   message.channel.send({embed})
 }
 
+// TODO: guild-agnostic + ez config
+/*
 module.exports.events.guildBanAdd = async (bot, guild, user) => {
   if (botChannels[guild.id] === undefined) return
-  if (!guild.member(bot.user).hasPermission('MANAGE_GUILD')) return
+  if (!guild.me.permissions.has('MANAGE_GUILD')) return
 
   let invites = await guild.fetchInvites()
   let foundInvites = invites.filter(inv => inv.inviter.id === user.id )
@@ -72,11 +71,12 @@ module.exports.events.guildBanAdd = async (bot, guild, user) => {
     .setAuthor(`${user.username}#${user.discriminator} (${user.id})`, user.avatarURL)
     .setTitle('Displaying invites created by recently banned user:')
     .setDescription('```md\n' + formattedInvites + '```')
-    .setFooter('Use "r?banrevoke <id>" or "r?br <id>" to revoke all invites.' + (guild.id === '120330239996854274') ? 'Ksink has already revoked the invites': '')
+    .setFooter('Use "b!banrevoke [id]" or "b!br [id]" to revoke all invites.' + (guild.id === '120330239996854274') ? 'Ksink has already revoked the invites': '')
 
 
   guild.channels.get(botChannels[guild.id].logChannel).send({embed})
 }
+*/
 
 function shittyMStoTime(time, text) {
   let rep = new Map()
