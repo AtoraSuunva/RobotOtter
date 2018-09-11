@@ -11,6 +11,26 @@ const snek = require('snekfetch')
 const recurReadSync = require('recursive-readdir-sync') //to read all files in a directory, including subdirectories
 //this allows you to sort modules into directories
 
+const pmx = require('pmx').init({
+  http          : true, // HTTP routes logging (default: true)
+  ignore_routes : [], // Ignore http routes with this pattern (Default: [])
+  errors        : true, // Exceptions logging (default: true)
+  custom_probes : true, // Auto expose JS Loop Latency and HTTP req/s as custom metrics
+  network       : true, // Network monitoring at the application level
+})
+
+const metrics = {
+  messages_seen: pmx.probe().counter({name: 'Messages Seen'}),
+  messages_sent: pmx.probe().counter({name: 'Messages Sent'}),
+  commands_ran: pmx.probe().counter({name: 'Commands Ran'}),
+  modules_ran: pmx.probe().counter({name: 'Modules Ran'}),
+  guilds: pmx.probe().metric({name: 'Guilds'}),
+  ping: pmx.probe().histogram({name: 'Ping', measurement: 'mean'}),
+}
+
+setInterval(() => metrics.ping.update(bot.ping), 3000)
+
+
 let config = module.exports.config = require('./config.json') //Settings for the module system
 let logger = module.exports.logger = new Logger('err.log', reportError, config.debug)
 let settings = module.exports.settings = new Settings(logger)
@@ -43,6 +63,7 @@ function startEvents() {
       for (let module in modules) {
         if (modules[module].events[event] !== undefined) {
           try {
+            metrics.modules_ran.inc()
             modules[module].events[event](bot, ...args)
           } catch (e) {
             logger.error(e, `Module Err: ${event}`)
@@ -54,7 +75,11 @@ function startEvents() {
 
   //message doesn't like being in the loop
   //Also I need to do some extra checks anyways
-  bot.on('message', processMessage)
+  bot.on('message', m => {
+    metrics.messages_seen.inc()
+    metrics.guilds.set(bot.guilds.size)
+    processMessage(m)
+  })
 
   bot.on('messageUpdate', (oldmessage, message) => {
     if (oldmessage.content !== message.content)
@@ -97,6 +122,7 @@ function startEvents() {
           logger.debug(`Running ${module}`)
 
         try {
+          metrics.commands_ran.inc()
           modules[module].events.message(bot, message)
         } catch (e) {
           ctx = {
@@ -182,6 +208,7 @@ let handler = {
           sentMessages.delete(sentMessages.firstKey())
       })
 
+    metrics.messages_sent.inc()
     return promise
   }
 }
@@ -288,6 +315,43 @@ function shlex(str, {
   return matches.map(v => v.replace(/\\(")|\\(')/g, '$1'))
 }
 module.exports.shlex = shlex
+
+const uReg = {
+  full: /(.+#\d+)/,
+  user: /(\D+)/,
+  id: /(\d+)/,
+}
+
+async function extractMembers(str, guild, {id = false} = {}) {
+  if (!(guild instanceof Discord.Guild))
+    throw new Error('You need to provide a guild')
+
+  const arr = shlex(str)
+  const users = []
+
+  await guild.fetchMembers()
+
+  for (let a of arr) {
+    let match, u
+
+    if (match = uReg.full.exec(a)) {
+      u = guild.members.find(m => m.user.tag === match[1])
+    } else if (match = uReg.id.exec(a)) {
+      u = guild.members.get(match[1])
+    } else {
+      u = guild.members.find(m => m.user.username === a)
+    }
+
+    if (u) users.push(u)
+  }
+
+  if (id)
+    return users.map(m => m.id)
+
+  return users
+}
+module.exports.extractMembers = extractMembers
+
 /**
  * Gets all the events used by the modules
  * @param  {Object}   fuckIDunnoWhatJSDocWantsHere Object with only one property: getUnused. If the function should return unused events instead of used events
@@ -368,25 +432,25 @@ function loadModules() {
 
   for (let file of moduleFiles) {
     purgeCache(file)
+    const rName = file.replace(path.join(__dirname, 'modules/'), '')
 
     try {
-      const rName = file.replace(path.join(__dirname, 'modules/'), '')
       const rFile = require(file)
 
       if (rFile.config === undefined)
         continue
 
-      if (rFile.config.autoLoad === false) {
+      if (rFile.config.autoload === false || rFile.config.autoLoad === false) {
         logger.debug(`Skipping ${rName}: AutoLoad Disabled`)
         continue
       }
 
       logger.debug(`Loading ${rName}`)
-      modules[rFile.config.name] = rFile
+      modules[rFile.config.name] = require(file)
       succ.push(rFile.config.name)
     } catch (e) {
-      logger.warn(`Failed to load ${file}: \n${e}`)
-      fails.push(file)
+      logger.warn(`Failed to load ${rName}: \n${e}`)
+      fails.push(rName)
     }
   }
 
@@ -413,7 +477,7 @@ function loadModule(moduleName) {
       if (rFile.config && moduleName === rFile.config.name) {
         logger.debug(`Loading ${rName}`)
         purgeCache(file)
-        modules[moduleName] = rFile
+        modules[moduleName] = require(file)
         return `Loaded ${moduleName} successfully`
       }
     }
@@ -592,7 +656,7 @@ module.exports.saveAndExit = saveAndExit
 module.exports.modules = modules
 
 bot.logger = logger
-bot.modules = module.exports
+bot.sleet = module.exports
 
 // *cries in js*
 
