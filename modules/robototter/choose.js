@@ -1,10 +1,10 @@
 // pick things
 module.exports.config = {
   name: 'choose',
-  invokers: ['choose', 'pick'],
+  invokers: ['choose from', 'choose', 'pick'],
   help: 'Picks from a list',
-  expandedHelp: 'For when you can\'t decide.',
-  usage: ['Choose a thing', 'pick thing "another thing" meme']
+  expandedHelp: 'For when you can\'t decide.\nThings with spaces should be surrounded in quotes, "like this" or \'like this\'.',
+  usage: ['Choose a thing', 'pick thing "another thing" meme', 'Choose some more', 'pick one_word "multiple words here", one_again']
 }
 
 const responsesNoChoices = ['I pick... Nothing',
@@ -25,7 +25,7 @@ const responses = ['I pick', 'Hmm...', 'Uh, how about', 'Obviously',
 
 module.exports.events = {}
 module.exports.events.message = (bot, message) => {
-  const [cmd, ...choices] = bot.modules.shlex(message)
+  const [cmd, ...choices] = bot.sleet.shlex(message)
   const prefix = (message.member ? message.member.displayName : message.author.username) + ', '
 
   if (choices.length === 0)

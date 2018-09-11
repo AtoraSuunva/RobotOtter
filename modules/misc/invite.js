@@ -10,7 +10,7 @@ module.exports.config = {
 
 module.exports.events = {}
 module.exports.events.message = (bot, message) => {
-  let args = bot.modules.shlex(message.content)
+  let args = bot.sleet.shlex(message.content)
 
   if (args[1] === 'server' || args[1] === 'guild') {
     message.author.send('https://discord.gg/0w6AYrrMIUfO71oV')

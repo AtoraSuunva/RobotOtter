@@ -1,6 +1,6 @@
 {
   "name": "robototter-discord",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "discord bot for stuff",
   "main": "modules.js",
   "scripts": {
@@ -23,7 +23,9 @@
     "convert-units": "^2.3.1",
     "discord.js": "^11.0.0",
     "erlpack": "discordapp/erlpack",
+    "pmx": "^1.6.7",
     "recursive-readdir-sync": "^1.0.6",
+    "snekfetch": "^4.0.4",
     "sodium": "^2.0.1",
     "uws": "^8.14.0",
     "zlib-sync": "^0.1.3"

@@ -11,9 +11,9 @@ const convert = require('convert-units')
 
 module.exports.events = {}
 module.exports.events.message = (bot, message) => new Promise(send => {
-	let args = bot.modules.shlex(message.content).slice(1)
+	let args = bot.sleet.shlex(message.content).slice(1)
 
-	bot.modules.logger.log(args)
+	bot.sleet.logger.log(args)
 
 	/*
 	> 20f to c

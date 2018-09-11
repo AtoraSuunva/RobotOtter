@@ -1,9 +1,9 @@
 module.exports.config = {
   name: 'idof',
   invokers: ['idof', 'idoof', 'idof?'],
-  help: 'Fetches the id of a mentioned user/by username/tag.',
-  expandedHelp: 'Useful for mobile.\n`idof` will search for the *full* username, `idof? at` will also match `at` in `Atlas`\nAll searches are case insensitive.',
-  usage: ['Grab id', 'idof [@user/username/user#discrim]']
+  help: 'Fetches the id of a mentionned user/by username/tag. Useful for mobile.',
+  expanddedHelp:'`idof` will search for the *full* username, `idof? at` will also match `at` in `Atlas`\nAll searches are case insensitive.',
+  usage: ['Get id', 'idof [@user/username/user#discrim]']
 }
 
 module.exports.events = {}
@@ -11,7 +11,7 @@ module.exports.events.message = async (bot, message) => {
   if (message.mentions.users.first()) return message.channel.send(message.mentions.users.first().id)
   if (!message.guild) return
 
-  let [cmd, ...user] = bot.modules.shlex(message),
+  let [cmd, ...user] = bot.sleet.shlex(message),
       r = [],
       exactResults = []
 

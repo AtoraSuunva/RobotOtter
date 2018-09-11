@@ -13,7 +13,7 @@ const tail = '(T)'
 
 module.exports.events = {}
 module.exports.events.message = (bot, message) => {
-  let [cmd, coins] = bot.modules.shlex(message)
+  let [cmd, coins] = bot.sleet.shlex(message)
   coins = coins !== undefined ? parseInt(coins) : 1
   const prefix = (message.member ? message.member.displayName : message.author.username) + ', '
 

@@ -2,18 +2,16 @@ module.exports.config = {
   name: 'unedit',
   invokers: ['unedit'],
   help: 'Posts all the versions of a message',
-  expandedHelp: 'Unedits a message in the current channel.\nLocked to "Manage Messages".',
-  usage: ['Unedit in current channel', 'unedit <message id>', 'Unedit in other channel', 'unedit <message id> [channel id|#channel]'],
-  invisible: true
+  expandedHelp: 'Fetches all cached revisions of a message.\nRequires "Manage Messages".',
+  usage: ['In current channel', 'unedit [message id]', 'In another channel', 'unedit [message id] [channel id]']
 }
 
 module.exports.events = {}
 module.exports.events.message = async (bot, message) => {
   if (!message.guild) return
-  if (message.author.id !== bot.modules.config.owner.id
-      && !message.channel.permissionsFor(message.author).has('MANAGE_MESSAGES')) return
+  if (message.author.id !== bot.sleet.config.owner.id && !message.member.hasPermission('MANAGE_MESSAGES')) return
 
-  let [cmd, msg, channel] = bot.modules.shlex(message)
+  let [cmd, msg, channel] = bot.sleet.shlex(message)
   channel = (channel) ? message.guild.channels.get(channel.replace(/[<>#]/g, '')) : message.channel
 
   if (!channel) return message.channel.send('Could not find that channel.')

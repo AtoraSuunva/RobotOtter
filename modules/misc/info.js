@@ -15,7 +15,7 @@ module.exports.events.message = (bot, message) => {
   getCPUUsage().then(cpu => {
     let fields = new Map()
     .set('Links:'   , '[Github](https://github.com/AtlasTheBot/RobotOtter-Discord)\nBot Invite/Sever: `r?invite`')
-    .set('Owner:'   , `${bot.modules.config.owner.username}#${bot.modules.config.owner.discriminator}`)
+    .set('Owner:'   , `${bot.sleet.config.owner.username}#${bot.sleet.config.owner.discriminator}`)
     .set('Using:'   , `Node ${process.version}\ndiscord.js v${require('discord.js').version}`)
     .set('CPU:'     , `${(100 - (cpu * 100)).toFixed(2)}%`)
     .set('RAM:'     , `${formatBytes(os.totalmem() - os.freemem(), 1)}/${formatBytes(os.totalmem(), 1)} - ${((os.totalmem() - os.freemem()) / os.totalmem()*100).toFixed(2)}%`)

@@ -11,8 +11,8 @@ module.exports.config = {
 
 module.exports.events = {}
 module.exports.events.message = (bot, message) => {
-  let config = bot.modules.config
-  let modules = bot.modules
+  let config = bot.sleet.config
+  let modules = bot.sleet
 
   if (message.author.id === config.owner.id) {
     if (message.guild && message.channel.permissionsFor(bot.user).hasPermission('SEND_MESSAGES')) {
