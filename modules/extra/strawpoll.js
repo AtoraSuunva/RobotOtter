@@ -6,12 +6,12 @@ module.exports.config = {
   usage: ['Get results', 'strawpoll 1234']
 }
 
-const request = require('request')
+const snek = require('snekfetch')
 const endOfLine = require('os').EOL
 
 module.exports.events = {}
 module.exports.events.message = (bot, message) => {
-  let args = bot.modules.shlex(message.content)
+  let args = bot.sleet.shlex(message.content)
 
   if (args[1] === undefined)
     return message.channel.send('I need a poll ID to work with.')
@@ -19,22 +19,19 @@ module.exports.events.message = (bot, message) => {
   if (Number.isNaN(+args[1]))
     return message.channel.send('Poll IDs are usually only numbers.')
 
-  let header = {
-    url: 'http:\/\/www.strawpoll.me/api/v2/polls/' + args[1],
-    headers: {
-      'User-Agent': 'Strawpoll for Terminal (By AtlasTheBot)'
-    }
+  const url = 'http:\/\/www.strawpoll.me/api/v2/polls/' + args[1]
+  const headers = {
+    'User-Agent': 'Strawpoll for Terminal (By AtlasTheBot)'
   }
 
-  request(header, (error, response, body) => {
-    if (!error && response.statusCode == 200) {
-      let data = JSON.parse(body)
-      message.channel.send(sortVotes(data))
+  snek.get(url, {headers}).then(response => {
+    if (response.statusCode == 200) {
+      message.channel.send(sortVotes(response.body))
     } else {
       if (response.statusCode == 404)
         return message.channel.send('There\'s no strawpoll for that ID.')
 
-      bot.modules.logger.error(response)
+      bot.sleet.logger.error(response)
       message.channel.send('Something went wrong while trying to get that poll...')
     }
   })

@@ -2,11 +2,12 @@ module.exports.config = {
   name: 'purge',
   invokers: ['purge'],
   help: 'purges stuff',
-  expandedHelp: 'You can purge by emoji, embeds, bots, and with. Searches last 100 messages.',
-  usage: ['Purge <num> messages', 'purge <num>', 'Purge embeds', 'purge [num] embeds', 'Purge with', 'purge [num] with <words here>']
+  expandedHelp: 'Searches last 100 messages and purges as much as possible by default.\n`purge [num] [type] [extra...]`\n`num` is max number to purge (Optional, default 100)\n`type` is the type of purge to do (outlined below) (Optional, default \'All\')\n`Extra` are extra parameters to the purge type\nRequires you to have "Manage Messages"',
+  usage: ['Purge up to 100 messages', 'purge', 'Purge 10 messages', 'purge 10', 'Purge messages with emojis/emotes', 'purge emoji', 'Purge embeds', 'purge 40 embeds', 'Purge bot messages', 'purge bots', 'Purge bot messages and messages with invokers', 'purge bots b! + =', 'Purge messages with content', 'purge with banana']
 }
 
 const Discord = require('discord.js')
+const path = require('path')
 
 module.exports.events = {}
 module.exports.events.message = async (bot, message) => {
@@ -14,7 +15,7 @@ module.exports.events.message = async (bot, message) => {
 
   if (!message.channel.permissionsFor(message.guild.me).has('MANAGE_MESSAGES')) return message.channel.send("I can't manage messages.")
 
-  let [cmd, limit, type, ...extra] = bot.modules.shlex(message)
+  let [cmd, limit, type, ...extra] = bot.sleet.shlex(message)
 
   if (isNaN(parseInt(limit))) {
     extra = [type]
@@ -41,8 +42,6 @@ module.exports.events.message = async (bot, message) => {
 
     case 'embed':
     case 'embeds':
-    case 'image':
-    case 'images':
       toPurge = toPurge.filter(m => m.embeds.length > 0 || m.attachments.size > 0)
     break
 
@@ -52,11 +51,25 @@ module.exports.events.message = async (bot, message) => {
     break
 
    case 'with':
-     toPurge = toPurge.filter(m => m.content.includes(extra.join()))
+     toPurge = toPurge.filter(m => m.content.toLowerCase().includes(extra.join(' ').toLowerCase()))
+   break
+
+   case 'from':
+   case 'by':
+     members = await bot.sleet.extractMembers(extra.join(' '), message.guild, {id: true})
+
+    console.log(members)
+
+     toPurge = toPurge.filter(m => members.includes(m.author.id))
+   break
+
+   case 'regex':
+     const reg = new RegExp(extra.join(' '))
+     toPurge = toPurge.filter(m => reg.test(m.content))
    break
 
     default:
-      return message.channel.send('That is not a purge type.')
+      return message.channel.send(`${type} is not a purge type.`)
   }
 
   toPurge = Array.from(toPurge.values()).slice(0, limit).filter(m => Date.now() - m.createdAt < 1209600000)
@@ -72,9 +85,6 @@ module.exports.events.message = async (bot, message) => {
     let msgs = await message.channel.bulkDelete(toPurge, true).catch(() => {})
     purgeMsg = await message.channel.send('🗑 ' + msgs.size)
   }
-
-  //message.delete(3000).catch(() => {})
-  purgeMsg.delete(3000).catch(() => {})
 }
 
 

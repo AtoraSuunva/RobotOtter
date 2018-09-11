@@ -50,7 +50,7 @@ module.exports.events = {}
 //eventArgs     => The args sent by the event
 
 module.exports.events.message = (bot, message) => {
-  bot.modules.logger.log(message.content)
+  bot.sleet.logger.log(message.content)
 
   message.channel.sendMessage(`Congrats! You found the test command!`)
 }
