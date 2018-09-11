@@ -1,5 +1,7 @@
 # RobotOtter
-Discord chatbot for rolling dice &amp; flipping coins. Also some other features for /r/OtterDnD
+Discord bot for stuff like flipping dice & rollig coins.
+
+Now being repurposed to be more "moderation-focused," a m*otter*ator bot if you will.
 
 # Preview
 
@@ -7,185 +9,28 @@ Test it on Discord [here](https://discord.gg/0w6AYrrMIUfO71oV)!
 
 # How to use
 
-## Connect to Discord
-
-Literally click 4 times.
+## Invite it
 
 0. Click [here](https://discordapp.com/oauth2/authorize?client_id=189078347207278593&scope=bot&permissions=0).
 1. Select a server.
 2. Authorize.
-3. gg no re
 
-## Manual Setup
+## Selfhosting
 
-If for some reason you want to host it yourself.
+You can selfhost if you don't trust me for some reason :(
+Do note that maybe I've overlooked something and it'll break when you eun it on your machine, but I try to make it easy to setup (for my sanity)
 
-* Install [Node.js](https://nodejs.org/en/download/)
-* Install [discord.js](http://discordjs.readthedocs.org/en/latest/installing.html).
-* Download/Pull RobotOtter (Obviously) and extract it.
+* Install [Node.js](https://nodejs.org/en/download/) if you haven't already
+* Download/Pull RobotOtter from git
+* Fill out `config_example.json`, then rename to `config.json` (Don't worry about owner, it gets filled out automatically)
+* Open the directory it's in in the command line (NOT the node.js command prompt!! Window's cmd/powershell or Linux/OSX terminal!)
+* Run `npm install`
+* Run `node modules.js`
 
-### Public Bot
-
-See [here](https://discordapp.com/developers/docs/topics/oauth2#bot-vs-user-accounts), public bots *MUST* use a bot account, not a user account. Also gives the bot a sweet [BOT] tag.
-
-* Register an app [here](https://discordapp.com/developers/applications/me).
-* Create a bot user.
-* Copy the token to `authExample.json`.
-
-It should look like this:
-
-    {
-        "email": "Something@Here.Maybe",
-        "password": "^^this tbh fam",
-        "token": "longstringofrandomcharacters"
-    }
-
-* Rename `authExample.json` to `auth.json`.
-* Read `Run`
-
-### Private Bot
-
-* Create a Discord account (If you haven't already).
-* Join the channels you want to use the bot on.
-* Fill out `email` and `password` in `authExample.json`.
-* Rename it to `auth.json`. 
-* Read `Run`.
-
-### Run
-
-* Run in command line `node RobotOtter.js` while in the installation folder.
-
-If that doesn't work it's probably my fault because I suck at explaining.
+As an owner you get access to a few extra commands under `modules\core`, for managing the bot.
 
 # Commands
 
-Arguments between **{Curly Braces}** are **required**, while those between [Brackets] are optional.
+I'll rewrite this later, maybe instead use the github wiki.
 
-## !roll {times}d{sides}[+-*/]{times}d{sides} OR {modifier}
-Rolls a dice. Follows [dice notation](https://en.wikipedia.org/wiki/Dice_notation).
-
-**{times}: Number of dice rolls (max. 10, default 1.)**
-
-**{dice}: Number of sides per die (max. 256)**
-
-[+-/*]: (Monster) math operator to use.
-
-[modifier]: Number to modify the roll by.
-
-*Example: !roll 2d20 =>*
-
-    {8} + {14}
-    = 22
-
-*!roll d20-d3 =>*
-
-    {8} = (8) - [1]
-    = 7
-
-## !flip [times]
-Flips a coin.
-
-[times]: Number of coin flips (max. 10)
-
-*Example: !flip 2 =>*
-
-    {T} + {H} = [H = 1] : [T = 1]
-
-## !choose {item1, item2, ...itemN}
-Chooses an item from a comma-delimited list of them.
-
-{itemN}: Anything you want, as long as it doesn't have a `,`
-
-*Example: !choose hello, world,localhost:8080 =>*
-
-    -> world
-
-## !pun {category}
-Says a pun.
-
-{category}: The kind of pun.
-
-*Example: !pun cat =>*
-
-    Purr-fect
-
-## !wiki [page]
-*Subreddit mode only*
-
-Shows the wiki or a page on the wiki.
-
-[page]: Page name to show:
-
-    items, quests, players, locations
-
-*Example: !wiki players =>*
-
-   `https:/reddit.com/r/OtterDnD/wiki/players`
-
-
-## !help [command]
-Brings a help menu or help for a specific command.
-
-[command]: The command to show help for.
-
-*Example: !help flip =>*
-
-    Formatting: !flip {times}
-    {times}: Number of coin flips (max. 10)
-    Example: !flip 2 => {T} + {H} = [H = 1] : [T = 1]
-
-# Settings
-
-## Changing Settings
-
-First, you either need the "Manage Server" permission OR be in a channel named "bot-settings" (keep in mind anyone with access to that channel can modify settings).
-
-Then, use `prefix(x2)setting` to see settings, `prefix(x2)setting settingName` to see the value for a setting and `prefix(x2)setting settingName newValue` to set a new value.
-
-(prefix(x2) is the prefix twice, so by default you need to write `!!setting`)
-
-###  "prefix"
-`Default: "!"`
-
-The prefix placed before commands. You should only change it if "!" conflicts with another bot.
-
-###  "maxDiceTimes"
-`Default: 10`
-
-The max amount of times you can roll a dice in one command.
-High values such as 100000 **will** cause RobotOtter to stop responding while it rolls 100000 dice (Trust me).
-
-### "maxDiceSides"
-`Default: 256`
-
-The maximum amount of sides a die can have.
-
-### "maxModifier"
-`Default: 1000`
-
-The maximum number you can modify (add, substract, multiply, divide) by.
-
-### "maxCoinFlips"
-`Default: 10`
-
-Maximum amount of times you can flip a coin in one command.
-Probably has the same problem as `!roll` where *really* high values cause it to stop responding.
-
-### "subreddit"
-`Default: false`
-
-You probably don't need to change this unless you want to use !wiki for some reason.
-
-### "memes"
-*A whole bunch of sub-aspects things*
-
-`Default: true`
-
-An array (list) of meme settings. Enable/Disable by changing each one to true/false.
-
-## License
-Whoever uses this project (The USER) must agree to never hit Atlas (The AUTHOR) with a cactus. Or insert said cactus into any orifices. The AUTHOR may request the USER at any time to "Never talk to me or my bot ever again." or to "Drop and give me 20". The USER must also admit to the AUTHOR that otters are "pretty neat animals" when asked about them. Any and all violation of these clauses will allow the AUTHOR to take one (1) soul from the offending USER. These clauses extend for as long as the bot is in use, so not even through death can the USER excape the AUTHOR.
-
-Also I don't know what any of the licenses mean or be bothered to keep track of who uses it.
-
-Although if you do use this (God knows why), then I'd love to hear about it!
+In the meantime, use `r?help`
