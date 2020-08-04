@@ -3,6 +3,7 @@
  */
 
 const Discord = require('discord.js')
+const escapeMarkdown = Discord.Util.escapeMarkdown
 const fs = require('fs')
 const path = require('path')
 const Logger = require('./logger.js')
@@ -37,6 +38,7 @@ let settings = module.exports.settings = new Settings(logger)
 let sentMessages = new Discord.Collection(), maxSentMessagesCache = 100
 
 let modules = {}
+let moduleErrors = []
 loadModules()
 
 //Actually starts listening to events
@@ -92,18 +94,14 @@ function startEvents() {
     for (let module in modules) {
       if (modules[module].events.everyMessage !== undefined) {
         //logger.debug(`Running ${module}`)
-        try {
-          modules[module].events.everyMessage(bot, message)
-        } catch (e) {
-          ctx = {
-            guild: message.channel.guild ? message.channel.guild.id : null,
-            type: message.channel.type,
-            channel: message.channel.id,
-            messageId: message.id,
-            messageContent: message.content
+
+        new Promise((res, rej) => {
+          try {
+            modules[module].events.everyMessage(bot, message)
+          } catch (e) {
+            logErrorWithContext(e, message)
           }
-          logger.error(e.stack + '\n' + JSON.stringify(ctx, null, 4))
-        }
+        }).catch(e => logErrorWithContext(e, message))
       }
     }
 
@@ -121,20 +119,18 @@ function startEvents() {
         if (modules[module].config.invokers !== null && modules[module].config.invokers !== undefined)
           logger.debug(`Running ${module}`)
 
-        try {
-          metrics.commands_ran.inc()
-          modules[module].events.message(bot, message)
-        } catch (e) {
-          ctx = {
-            guild: message.channel.guild ? message.channel.guild.id : null,
-            type: message.channel.type,
-            channel: message.channel.id,
-            messageId: message.id,
-            messageContent: message.content
+        metrics.commands_ran.inc()
+
+        new Promise((res, rej) => {
+          try {
+            modules[module].events.message(bot, message)
+          } catch (e) {
+            logErrorWithContext(e, message)
           }
-          logger.error(e.stack + '\n' + JSON.stringify(ctx, null, 4))
-          message.channel.send(`Whoops, something went wrong!\nI sent ${config.owner.username} some debug info.`)
-        }
+        }).catch(e => {
+          logErrorWithContext(e, message)
+          message.channel.send(`Something went wrong!\nI sent ${config.owner.username} some debug info.`)
+        })
       }
     }
   }
@@ -162,6 +158,18 @@ function startEvents() {
 }
 //Some helper functions
 
+function logErrorWithContext(e, msg) {
+  ctx = {
+    guild: message.channel.guild ? message.channel.guild.id : null,
+    type: message.channel.type,
+    channel: message.channel.id,
+    messageId: message.id,
+    messageContent: message.content
+  }
+
+  logger.error(e.stack + '\n' + JSON.stringify(ctx, null, 2))
+}
+
 let send = Object.getOwnPropertyDescriptor(Discord.TextChannel.prototype, 'send')
 
 let handler = {
@@ -178,7 +186,8 @@ let handler = {
       return target.call(thisArg, '`[ Embeds are disabled and no non-embed version is available ]`')
     }
 
-    if ((content+'').trim() === '') {
+
+    if (((content+'').trim() === '') && options === undefined) {
       content = 'Empty Message.\n' +
                 (new Error()).stack.split('\n')[1].match(/(\/modules\/.+?)\)/)[1]
       // lol stacktraces
@@ -277,6 +286,7 @@ function shlex(str, {
   stripOnlyCommand = false,
   invokers = []
 } = {}) {
+  if (str === undefined || str === null) return []
   if (str.content) str = str.content
 
   const regex = /"([\s\S]+?[^\\])"|'([\s\S]+?[^\\])'|([^\s]+)/gm //yay regex
@@ -285,7 +295,7 @@ function shlex(str, {
 
   for (let invoker of config.invokers) {
     if (str.toLowerCase().startsWith(invoker.toLowerCase())) {
-      str = str.substring(invoker.length)
+      str = str.substring(invoker.length).trim()
       break
     }
   }
@@ -293,7 +303,7 @@ function shlex(str, {
   for (let invoker of invokers) {
     if (str.toLowerCase().startsWith(invoker.toLowerCase())) {
       matches.push(str.substring(0, invoker.length))
-      str = str.substring(invoker.length)
+      str = str.substring(invoker.length).trim()
       break
     }
   }
@@ -322,9 +332,18 @@ const uReg = {
   id: /(\d+)/,
 }
 
-async function extractMembers(str, guild, {id = false} = {}) {
-  if (!(guild instanceof Discord.Guild))
-    throw new Error('You need to provide a guild')
+async function extractMembers(str, source, {id = false, keepIds = false} = {}) {
+  let guild
+  let message
+
+  if (source instanceof Discord.Guild)
+    guild = source
+  else if (source instanceof Discord.Message)
+    [guild, message] = [source.guild, source]
+  else if (source instanceof Discord.Channel)
+    guild = source.channel
+  else
+    throw new Exception('`source` must be one of [Guild, Message, Channel]')
 
   const arr = shlex(str)
   const users = []
@@ -332,12 +351,20 @@ async function extractMembers(str, guild, {id = false} = {}) {
   await guild.fetchMembers()
 
   for (let a of arr) {
-    let match, u
+    let match
+    let u
+    let la = a.toLowerCase()
 
-    if (match = uReg.full.exec(a)) {
+    if (message && ['me', 'myself'].includes(la)) {
+      u = message.member
+    } else if (['you', 'yourself'].includes(la)) {
+      u = guild.me
+    } else if (['random', 'someone'].includes(la)) {
+      u = guild.members.random()
+    } else if (match = uReg.full.exec(a)) {
       u = guild.members.find(m => m.user.tag === match[1])
     } else if (match = uReg.id.exec(a)) {
-      u = guild.members.get(match[1])
+      u = guild.members.get(match[1]) || (keepIds ? match[1] : undefined)
     } else {
       u = guild.members.find(m => m.user.username === a)
     }
@@ -346,7 +373,7 @@ async function extractMembers(str, guild, {id = false} = {}) {
   }
 
   if (id)
-    return users.map(m => m.id)
+    return users.map(m => m.id || m)
 
   return users
 }
@@ -451,11 +478,16 @@ function loadModules() {
     } catch (e) {
       logger.warn(`Failed to load ${rName}: \n${e}`)
       fails.push(rName)
+      moduleErrors.push({module: rName, error: e})
     }
   }
 
   logger.log(`Loaded: ${succ.join(', ')}`)
-  if (fails.length > 0) logger.warn(`Failed: ${fails.join(', ')}`)
+
+  if (fails.length > 0) {
+    logger.warn(`Failed: ${fails.join(', ')}`)
+  }
+
   return `Loaded ${succ.length} module(s) sucessfully; ${fails.length} failed.`
 }
 module.exports.loadModules = loadModules
@@ -563,14 +595,14 @@ function purgeCache(moduleName) {
  */
 function reportError(err, errType) {
   let errID = Math.floor(Math.random() * 1000000).toString(16)
-  let errMsg = `Error: ${errType}\nID: ${errID}\n\`\`\`js\n${err.toString()}` + '\n```'
-             + '\nStack Trace:\n```javascript\n' + new Error().stack + '\n```'
+  let errMsg = `Error: ${errType}\nID: ${errID}\n\`\`\`js\n${err.toString()}\n\`\`\``
 
   if (!config.selfbot)
     bot.users.get(config.owner.id).send(errMsg, {split: {prepend: '```js\n', append: '\n```'}})
   return errID
 }
 module.exports.reportError = reportError
+
 /**
  * Promisefied fs.writefile
  * @param  {String} fileName    The filename to write to
@@ -608,24 +640,45 @@ function createGist(files, {filename = '', description = ''} = {}) {
 }
 module.exports.createGist = createGist
 
+/**
+ * Formats a user like `**username**#discrim`
+ * Or optionally `**username**#discrim (id)`
+ * Adds a left-to-right character `\u{200e}` to deal correctly with arabic usernames etc
+ *
+ * @param {Discord.User} The user to format
+ * @param {addId=true}   If `(id)` should be appended
+ * @return {String} The formatted string
+ */
+function formatUser(user, addID = true) {
+  return `**${escapeMarkdown(user.username)}**\u{200e}#${user.discriminator} ${addID ? '(' + user.id + ')' : ''}`
+}
+module.exports.formatUser = formatUser
+
 startEvents()
 
 logger.info('Starting Login...')
-bot.login(config.token).then(() => {
+
+bot.login(config.token).then( async () => {
   logger.info('Logged in!')
+
   if (config.owner === null) {
     logger.info('Fetching Owner info...')
-    bot.fetchApplication().then(OAuth => {
-      config.owner = OAuth.owner
-      fs.writeFile('./config.json', JSON.stringify(config, null, 2), (err) => {
-        logger.info((err) ? err : 'Saved Owner info!')
-      })
+
+    const oAuth = await bot.fetchApplication()
+    config.owner = OAuth.owner
+
+    fs.writeFile('./config.json', JSON.stringify(config, null, 2), (err) => {
+      logger.info((err) ? err : 'Saved Owner info!')
     })
+  }
+
+  if (moduleErrors.length > 0) {
+    reportError(moduleErrors.map(v => `${v.module}: ${v.error.message}`).join('\n'), 'Failed to load modules')
   }
 })
 
 bot.on('disconnect', reason => {
-  logger.log(reason)
+  logger.warn(reason)
   saveAndExit()
 })
 

@@ -20,14 +20,13 @@
   },
   "homepage": "https://github.com/AtlasTheBot/RobotOtter-Discord#readme",
   "dependencies": {
+    "@discordjs/uws": "^10.149.0",
     "convert-units": "^2.3.1",
-    "discord.js": "^11.0.0",
-    "erlpack": "discordapp/erlpack",
+    "discord.js": "^11.5.1",
+    "libsodium-wrappers": "^0.7.5",
     "pmx": "^1.6.7",
     "recursive-readdir-sync": "^1.0.6",
     "snekfetch": "^4.0.4",
-    "sodium": "^2.0.1",
-    "uws": "^8.14.0",
-    "zlib-sync": "^0.1.3"
+    "zucc": "^0.1.2"
   }
 }
