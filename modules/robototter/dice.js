@@ -3,28 +3,32 @@ module.exports.config = {
   name: 'dice',
   invokers: ['dice', 'roll'],
   help: 'Rolls some dice',
-  expandedHelp: 'Uses the `AdX` notation! (A = dice, X = sides)\nSupports modifers (`AdX+C` or `-C`/`*C`/`/C`)\nSupports dropping lowest/highest result (2d4-L)',
-  usage: ['Roll 2 6-sided dice', 'roll 2d6', 'Roll a 3-sided die', 'roll d3', 'Roll with modifier', 'roll 2d6+5', 'Drop lowest roll', 'roll 2d6-L']
+  expandedHelp: 'Uses the `AdX` notation! (A = dice, X = sides)\nSupports modifers (`AdX+C` or `-C`/`*C`/`/C`)\nSupports dropping lowest/highest result (2d4-L)\nYou can roll multiple dice in 1 command.',
+  usage: ['Roll 2 6-sided dice', 'roll 2d6', 'Roll a 3-sided die', 'roll d3', 'Roll with modifier', 'roll 2d6+5', 'Drop lowest roll', 'roll 2d6-L', 'Roll multiple dice', 'roll 1d6+1 1d7+2 1d8-L 1d9']
 }
 
 const diceReg = /(\d+)?d(\d+)([-+*\/])?(\d+|L|H)?d?(\d+)?/
 const maxDice  = 50
-const maxSides = 200
-const maxMod = 1000
+const maxSides = 10000
+const maxMod = 10000
 
 module.exports.events = {}
 module.exports.events.message = (bot, message) => {
-  const [cmd, die] = bot.sleet.shlex(message)
-  const prefix = (message.member ? message.member.displayName : message.author.username) + ','
+  const [cmd, ...diceRolls] = bot.sleet.shlex(message)
+  const results = diceRolls.length > 1 ? diceRolls.map(d => `${d}: ${getDieResult(d)}`).join('\n') : getDieResult(diceRolls[0])
+  return message.channel.send(results)
+}
+
+function getDieResult(die) {
   const parse = diceReg.exec(die)
 
   if (parse === null)
-    return message.channel.send(`${prefix} Something seems wrong with your formatting.`)
+    return 'Something seems wrong with your formatting: `AdX` -> A = # of dice, X = # of sides'
 
   let [match, dice, sides, op, mod, mod2] = parse
 
   if (!sides)
-    return message.channel.send(`${prefix} Try learning dice notation first.`)
+    return 'Try learning dice notation first: `AdX` -> A = # of dice, X = # of sides.'
 
   dice = dice !== undefined ? parseInt(dice) : 1
   sides = parseInt(sides)
@@ -34,61 +38,55 @@ module.exports.events.message = (bot, message) => {
 
   //yay arg checking
   if (Number.isNaN(dice) || Number.isNaN(sides))
-    return message.channel.send(`${prefix} I need numbers to work with.`)
+    return `I need numbers to work with.`
   if ((mod !== undefined && Number.isNaN(mod)) || (mod2 !== undefined && Number.isNaN(mod2)))
-    return message.channel.send(`${prefix} Your modifiers aren't numbers.`)
+    return `Your modifiers aren't numbers.`
 
   if (dice === 0)
-    return message.channel.send(`${prefix} I've already rolled your 0 dice for you.\nThe result is nothing.`)
+    return `I've already rolled your 0 dice for you.\nThe result is nothing.`
   if (dice < 0)
-    return message.channel.send(`${prefix} Sure, let me just pull out my negative dice`)
+    return 'Sure, let me just pull out my negative dice.'
 
   if (sides === 0)
-    return message.channel.send(`${prefix} I'd roll the dice if they existed`)
+    return `I'd roll the dice if they existed.`
   if (sides < 0)
-    return message.channel.send(`${prefix} Now you're just being silly`)
+    return `Now you're just being silly.`
 
   if (dice > maxDice)
-    return message.channel.send(`${prefix} I've only got ${maxDice} dice`)
+    return `I've only got ${maxDice} dice.`
   if (sides > maxSides || mod2 > maxSides)
-    return message.channel.send(`${prefix} You're asking me to roll spheres now, try ${maxSides} sides`)
+    return `You're asking me to roll spheres now, try ${maxSides} sides.`
 
   if (op === '/' && (mod === 0 || mod === undefined))
-    return message.channel.send(`${prefix} Nice try to divide by zero`)
+    return 'Nice try to divide by zero'
   if (mod > maxMod)
-    return message.channel.send(`${prefix} Calm down with your modifier, try ${maxMod}`)
+    return `Try a modifier lower than ${maxMod}.`
 
   if (['L', 'H'].includes(mod) && op !== '-')
-      return message.channel.send(`${prefix} You can only remove the lowest/highest (use \`-\`)`)
+      return 'You can only remove the lowest/highest (use `-`)'
   if (['L', 'H'].includes(mod) && dice === 1)
-      return message.channel.send(`${prefix} You'll get no results left then`)
+      return 'You will get no results left in this case.'
 
-  const modifier = (() => {
+  const modifier = new Array(dice).fill(0).map(v => {
     if (mod === undefined) return 0
     if (['L', 'H'].includes(mod)) return 0
     if (mod2 === undefined) return mod
     return rollDice(mod, mod2).reduce(sum)
-  })()
+  })
 
-  const rolls = rollDice(dice, sides)
+  const rolls = rollDice(dice, sides).map((v, i) => safeMath(v, op, modifier[i]))
   let finalRolls = rolls, dropped
 
   if (['L', 'H'].includes(mod))
     [finalRolls, dropped] = (mod === 'L') ? removeSmallest(rolls) : removeLargest(rolls)
 
   const total = finalRolls.reduce(sum)
-  const occurences = JSON.stringify(countOccurences(finalRolls)).replace(/"/g, '').replace(/([:,])/g, '$1 ')
 
-  const msg = prefix + '\n' + finalRolls.join(', ') +
-              `\nFor a total of: \`${total}` +
-              (modifier ? ` ${op} ${modifier} = ${safeMath(total, op, modifier)}` : '') +
-              `\`\nAnd here's the count: ${occurences}` +
-              (dropped ? `\nAnd dropped: ${dropped}` : '')
+  const msg = '`' + finalRolls.join('` + `') + '`' +
+              (dice !== 1 ? ` = \`${total}\`` : '') +
+              (dropped ? ` (dropped \`${dropped}\`)` : '')
 
-  if (msg.length < 2000)
-    message.channel.send(msg)
-  else
-    message.channel.send(`${prefix} The result was too long for me to send`)
+  return msg.length < 500 ? msg : 'The result was too long, try less dice.'
 }
 
 function sum(a, b) {
@@ -109,22 +107,11 @@ function randInt(min, max) {
 function safeMath(num1, op, num2) {
   switch(op) {
     case '+': return num1 + num2
-    break
     case '-': return num1 - num2
-    break
     case '*': return num1 * num2
-    break
     case '/': return num1 / num2
-    break
     default: return num1 + num2
   }
-}
-
-function countOccurences(arr) {
-  const o = {}
-  for (let i of arr)
-    o[i] = o[i] ? o[i] + 1 : 1
-  return o
 }
 
 function removeSmallest(arr) {
