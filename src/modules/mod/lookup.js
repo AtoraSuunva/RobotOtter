@@ -1,12 +1,12 @@
 const {invokers} = module.exports.config = {
   name: 'lookup',
-  invokers: ['lookup', 'whois', 'who is', 'who the fuck is'],
+  invokers: ['lookup', 'whois', 'who is', 'who the fuck is', '?'],
   help: 'Fetches info for a user, guild, or invite',
   expandedHelp: 'Use a user id, guild id, or guild invite to fetch public info about them',
   usage: ['User', 'lookup 74768773940256768', 'Guild', 'lookup 81384788765712384', 'Invite', 'lookup discord-api']
 }
 
-const snek = require('snekfetch')
+const fetch = require('node-fetch')
 const Discord = require('discord.js')
 const path = require('path')
 const time = require('./time.js')
@@ -16,7 +16,7 @@ module.exports.events = {}
 module.exports.events.message = async (bot, message) => {
   let [cmd, data] = bot.sleet.shlex(message, {invokers})
 
-  botTag = botTag || bot.emojis.find('name', 'botTag') || '[BOT]'
+  botTag = botTag || bot.emojis.find(e => e.name === 'botTag') || '[BOT]'
 
   if (!data) {
     return message.channel.send('What do you want me to lookup?')
@@ -26,12 +26,12 @@ module.exports.events.message = async (bot, message) => {
 
   try {
     const u = await bot.fetchUser(data)
-    return sendUserLookup(message.channel, u)
+    return sendUserLookup(bot, message.channel, u)
   } catch (e) {err = e}
 
   try {
     const i = await bot.fetchInvite(data)
-    return sendInviteLookup(message.channel, i)
+    return sendInviteLookup(bot, message.channel, i)
   } catch (e) {err = e}
 
   try {
@@ -53,7 +53,7 @@ module.exports.events.message = async (bot, message) => {
     }
 
     if (g.instant_invite) {
-      return sendInviteLookup(message.channel, await bot.fetchInvite(g.instant_invite))
+      return sendInviteLookup(bot, message.channel, await bot.fetchInvite(g.instant_invite))
     }
 
     return sendGuildLookup(message.channel, g)
@@ -68,7 +68,7 @@ async function fetchGuild(data) {
   let r
 
   try {
-    r = await snek.get(widgetUrl(data))
+    r = await fetch(widgetUrl(data))
   } catch (e) {
     r = e
   }
@@ -78,28 +78,30 @@ async function fetchGuild(data) {
   } else if (r.status === 403) {
     return {message: 'Guild found with id "`' + data + '`", no more information found.'}
   } else if (r.status === 200) {
-    return r.body
+    return r.json()
   }
 }
 
 
-function sendUserLookup(channel, user) {
+function sendUserLookup(bot, channel, user) {
   if ( !(user instanceof Discord.User) ) return channel.send('Did not find info for that user.')
 
   channel.send({embed: new Discord.RichEmbed()
-    .setTitle(formatUserTag(user))
+    .setTitle(bot.sleet.formatUser(user, false))
     .setThumbnail(user.avatarURL)
     .setDescription(`**ID:** ${user.id}`)
     .addField('\nAccount Age:', time.since(user.createdAt).format())
-    .setFooter(`Created at `)
+    .addField('Created at (UTC):', user.createdAt.toUTCString())
+    .setFooter('Created at')
     .setTimestamp(user.createdAt)
   })
 }
 
-function sendInviteLookup(channel, invite) {
+function sendInviteLookup(bot, channel, invite) {
+  const created = Discord.SnowflakeUtil.deconstruct(invite.guild.id).date
   const embed = new Discord.RichEmbed()
     .setTitle(`:incoming_envelope: Invite: ${invite.code}`)
-    .addField(`Guild (${invite.guild.id}) ${invite.guild.splash ? '[Partner]' : ''}`, invite.guild.name + '\n[#' + invite.channel.name + '](http://a.ca)')
+    .addField(`Guild (${invite.guild.id})`, invite.guild.name + '\n[#' + invite.channel.name + '](http://a.ca)')
 
   if (invite.guild.icon)
     embed.setThumbnail(getGuildIcon(invite.guild))
@@ -117,18 +119,27 @@ function sendInviteLookup(channel, invite) {
     embed.addField('Channels:', `:pencil: ${invite.textChannelCount} text\n:loud_sound: ${invite.voiceChannelCount} voice`, true)
 
   if (invite.inviter)
-    embed.addField('Inviter:', `${formatUserTag(invite.inviter)} (${invite.inviter.id})`)
+    embed.addField('Inviter:', `${bot.sleet.formatUser(invite.inviter)}`)
+
+  embed
+    .addField('Created at (UTC):', created.toUTCString())
+    .setFooter('Created at')
+    .setTimestamp(created)
 
   channel.send({embed})
 }
 
 function sendGuildLookup(channel, guild) {
+  const created = Discord.SnowflakeUtil.deconstruct(guild.id).date
+
   const embed = new Discord.RichEmbed()
     .setTitle(`Guild: ${guild.name}`)
-    .setDescription('Guild found with that id')
-    .addField('Id:', guild.id)
+    .addField('ID:', guild.id, true)
+    .addField('Invite:', guild.instant_invite, true)
     .addField('Channels:', guild.channels.length + ' voice', true)
-    .addField('Members:', guild.members.length + ' online', true)
+    .addField('Members:', guild.presence_count + ' online', true)
+    .addField('Created at:', created.toUTCString())
+    .setTimestamp(created)
 
   channel.send({embed})
 }
@@ -139,8 +150,4 @@ function getGuildIcon(guild) {
 
 function getGuildSplash(guild, size = 512) {
   return Discord.Constants.Endpoints.Guild(guild.id).Splash(guild.client.options.http.cdn, guild.splash) + '?size=512'
-}
-
-function formatUserTag(user) {
-  return `**${Discord.Util.escapeMarkdown(user.username)}**\u{200e}#${user.discriminator}${user.bot ? botTag || ' [BOT]' : ''}`
 }

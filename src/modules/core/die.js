@@ -5,7 +5,6 @@ module.exports.config = {
   invokers: ['die', 'kys', 'do the thing'],
   help: 'Restarts the bot',
   expandedHelp: 'Please don\'t kill me...',
-  usage: ['ded', 'die'],
   invisible: true
 }
 
@@ -15,7 +14,7 @@ module.exports.events.message = (bot, message) => {
   let modules = bot.sleet
 
   if (message.author.id === config.owner.id) {
-    if (message.guild && message.channel.permissionsFor(bot.user).hasPermission('SEND_MESSAGES')) {
+    if (message.guild && message.channel.permissionsFor(bot.user).has('SEND_MESSAGES')) {
       message.channel.send('no u')
         .then(msg => modules.saveAndExit())
         .catch(err => {

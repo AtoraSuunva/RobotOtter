@@ -4,8 +4,8 @@ module.exports.config = {
   name: 'load',
   invokers: ['load', 'loaf', 'unfuck', 'unload'],
   help: '(Re)loads/unloads a module',
-  expandedHelp: '(Re)loads a module or all of them. Or unload one',
-  usage: ['(Re)load', 'load <module>', 'Reload all', 'load all', 'Unload module', 'unload <module>'],
+  expandedHelp: '(Re)loads a module.',
+  usage: ['Load a module', 'load moduleName', 'Unload a module', 'unload moduleName', '(Re)load all', 'load all'],
   invisible: true
 }
 
@@ -22,11 +22,11 @@ module.exports.events.message = (bot, message) => {
 
   if (cmd !== 'unload') {
     if (module !== 'all') {
-      message.channel.sendMessage(loadModule(module))
+      message.channel.send(loadModule(module))
     } else {
-      message.channel.sendMessage(loadModules())
+      message.channel.send(loadModules())
     }
   } else {
-    message.channel.sendMessage(unloadModule(module))
+    message.channel.send(unloadModule(module))
   }
 }

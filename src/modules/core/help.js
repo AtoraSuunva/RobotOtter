@@ -21,7 +21,6 @@ module.exports.events.message = (bot, message) => {
   let mod = 'Commands: ', msg, cmds, invokers, usage, aliases
 
   if (helpFor === '') {
-
     cmds = new Map()  //map of [dir: [commands]]
 
     for (let module in modules) {
@@ -39,9 +38,9 @@ module.exports.events.message = (bot, message) => {
     invokers = `\`${config.invokers.join('\` | \`')}\``
   } else {
     mod = ''
-    msg = `Could not find help for '${helpFor}'`
+    msg = `Could not find help for '${helpFor}'.`
     for (let module in modules) {
-      if (modules[module].config.name === helpFor && modules[module].config.expandedHelp !== undefined) {
+      if (modules[module].config.name === helpFor || (modules[module].config.invokers ? modules[module].config.invokers.includes(helpFor) : false)) {
         mod = module
         msg = modules[module].config.expandedHelp
         if (modules[module].config.invokers) aliases = `\`${modules[module].config.invokers.join('\` | \`')}\``

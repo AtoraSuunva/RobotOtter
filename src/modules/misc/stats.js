@@ -5,7 +5,7 @@ module.exports.config = {
   invokers: ['stats'],
   help: 'Displays some stats about the bot',
   expandedHelp: 'Displays some stats.',
-  usage: ['Get stats', 'stats']
+  usage: ['stats', 'stats']
 }
 
 module.exports.events = {}
@@ -19,7 +19,7 @@ module.exports.events.message = (bot, message) => {
   .set('I\'ve existed for:', shittyMStoTime(new Date().getTime() - bot.user.createdTimestamp, '{w} {week} {d} {day} {hh}:{mm}:{ss}'))
   .set('Up for:', shittyMStoTime(bot.uptime, '{w} {week} {d} {day} {hh}:{mm}:{ss}'))
 
-  if (message.guild !== null && message.channel.permissionsFor(message.client.user).hasPermission('EMBED_LINKS')) {
+  if (message.guild !== null && message.channel.permissionsFor(message.client.user).has('EMBED_LINKS')) {
     let Discord = require('discord.js')
     let embed = new Discord.RichEmbed()
       .setThumbnail(bot.user.avatarURL)
