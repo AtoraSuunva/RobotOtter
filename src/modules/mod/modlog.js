@@ -2,14 +2,14 @@ module.exports.config = {
   name: 'modlog',
   invokers: ['modlog'],
   help: 'Modlogging-power thing. Log stuff that happens',
-  expandedHelp:'WIP',
+  expandedHelp: 'WIP',
   invisible: true
 }
 
 const Discord = require('discord.js')
 const Time = require('./time.js')
 const MessageLog = require('./_MessageLog.js')
-const archiveViewer = 'https://giraffeduck.com/api/log/?'
+const archiveViewer = 'https://giraffeduck.com/api/log/'
 const escapeMarkdown = Discord.Util.escapeMarkdown
 
 const HOUR_MS = 3600000
@@ -34,6 +34,8 @@ const settingsTemplate = [
   {name: 'message_delete', type: 'boolean', init: true, help: 'Log deleted messages'},
   {name: 'channel_create', type: 'boolean', init: true, help: 'Log created channels'},
   {name: 'channel_delete', type: 'boolean', init: true, help: 'Log deleted channels'},
+  {name: 'reaction_actions', type: 'boolean', init: true, help: 'Allow to act on modlog entries by reacting (ie. ban with hammer)'},
+  {name: 'automod_action', type: 'boolean', init: true, help: 'Log automod actions in the modlog'},
 ]
 
 settingsTemplate.forEach((v, i) => settingsTemplate[i].reg = new RegExp('^' + prefix + v.name + '=(.*)', 'mi'))
@@ -68,6 +70,8 @@ function fetchConfig(guild, channel = null) {
       if (typeof val !== setting.type) continue
 
       settings[setting.name] = val
+    } else {
+      settings[setting.name] = setting.init
     }
   }
 
@@ -81,18 +85,25 @@ function getConfig(guild) {
   return ((typeof guild === 'string') ? configs.get(guild) : configs.get(guild.id) || fetchConfig(guild))
 }
 
-function sendLog(channel, emoji, type, message, {embed = null} = {}) {
-  const msg = `${emoji} \`[${type}]\`: ${message}`
+/** Pads the expressions in tagged template literals */
+function padExpressions(str, ...args) {
+  return str.map((v, i) => v + (args[i] !== undefined ? (args[i] + '').padStart(2, 0) : '')).join('')
+}
+
+function sendLog(channel, emoji, type, message, { embed = null, timestamp = new Date(), ...rest } = {}) {
+  const d = timestamp instanceof Date ? timestamp : new Date(timestamp)
+  const time = padExpressions`${d.getUTCHours()}:${d.getUTCMinutes()}:${d.getUTCSeconds()}`
+  const msg = `${emoji} \`[${time}]\` \`[${type}]\`: ${message}`
 
   if (embed && channel.permissionsFor(channel.client.user).has('EMBED_LINKS')) {
-    channel.send(msg, {embed})
+    return channel.send(msg, { embed, ...rest })
   } else {
-    channel.send(msg)
+    return channel.send(msg, rest)
   }
 }
 
 /**
- * A public fuunction for other modules to create logs
+ * A public function for other modules to create logs
  * Will automatically resolve the config (and not log if there's none)
  * and check if the setting is set to true
  *
@@ -113,15 +124,54 @@ function createLog(guild, setting, emoji, type, message, {embed = null} = {}) {
 module.exports.createLog = createLog
 
 module.exports.events = {}
-
-module.exports.events.ready = (bot) => {
-  for(let guild of bot.guilds) {
+module.exports.events.ready = async (bot) => {
+  for (let [id, guild] of bot.guilds) {
     let config = getConfig(guild)
-    if (!config) return
+    if (!config) continue
 
-    if (config.member_add_invite && guild.me.permissions.has('MANAGE_GUILD')) {
-      guild.fetchInvites().then(i => invites.set(guild.id, i))
+    if (config.settings.member_add_invite && guild.me.permissions.has('MANAGE_GUILD')) {
+      invites.set(guild.id, await guild.fetchInvites())
     }
+  }
+}
+
+module.exports.events.init = (sleet, bot) => {
+  // If we're reloading bot is not undefined
+  if (bot && bot.readyAt) {
+    module.exports.events.ready(bot)
+  }
+}
+
+module.exports.events.raw = async (bot, packet) => {
+  // Switch/case doesn't count as another scope :(
+  let guild, member, message
+
+  // Log things even if the member/message isn't cached :)
+  switch (packet.t) {
+    case 'GUILD_MEMBER_REMOVE':
+      guild = bot.guilds.get(packet.d.guild_id)
+
+      if (guild.members.get(packet.d.user.id)) return
+
+      member = packet.d.user
+      member.guild = guild
+      module.exports.events.guildMemberRemove(bot, member)
+      break
+
+    case 'MESSAGE_DELETE':
+      if (!packet.d.guild_id) return
+      channel = bot.channels.get(packet.d.channel_id)
+
+      // Cached, don't bother
+      if (channel.messages.get(packet.d.id)) return
+
+      await sleep(500)
+      message = { id: packet.d.id }
+      message.guild = channel.guild
+      message.channel = channel
+      message.uncached = true
+      module.exports.events.messageDelete(bot, message)
+      break
   }
 }
 
@@ -182,18 +232,18 @@ module.exports.events.channelDelete = async (bot, channel) => {
   const config = getConfig(channel.guild)
   if (!config || !config.settings.channel_delete) return
 
-  let createdBy
+  let deletedBy
 
   if (channel.guild.me.permissions.has('VIEW_AUDIT_LOG')) {
     await sleep(500)
     const auditLogs = await channel.guild.fetchAuditLogs({type: 'CHANNEL_DELETE'})
     const log = auditLogs.entries.find(val => val.changes.find(w => w.key === 'name' && w.old === channel.name))
-    if (log) createdBy = log.executor
+    if (log) deletedBy = log.executor
   }
 
   const msg = `**${channel.name}** (${channel.id}) [\`${channel.type}\`]`
             + (channel.parent ? ` in **${channel.parent.name}** (${channel.parent.id})` : '')
-            + (createdBy ? ` deleted by ${bot.sleet.formatUser(createdBy)}`: '')
+            + (deletedBy ? ` deleted by ${bot.sleet.formatUser(deletedBy)}`: '')
 
   sendLog(config.channel, ':house_abandoned:', 'Channel Deleted', msg)
 }
@@ -216,7 +266,7 @@ module.exports.events.guildMemberAdd = async (bot, member) => {
   embed.setDescription(`${config.settings.member_add_mention ? '' : member + ' | '}
 **${member.guild.memberCount}** Members ${invMem} ${newAcc}`)
     .setColor(colors.memberAdd)
-    .setFooter(`${Time.trim(Time.since(member.user.createdAt).format({short: true}), 3)} old`)
+    .setFooter(`${Time.trim(Time.since(member.user.createdAt).format({short: true}), 3)} old`, member.user.avatarURL)
     .setTimestamp(new Date())
 
   sendLog(config.channel, ':inbox_tray:', 'Member Join', msg, {embed})
@@ -239,7 +289,7 @@ async function getInviter(bot, guild) {
   if (!possibleInviters || possibleInviters.size === 0) {
     return null
   } else {
-    return possibleInviters.map(i => `${bot.sleet.formatUser(i.inviter, true)} {\`${i.code}\`} <\`${i.uses}\`>`).join(', ')
+    return possibleInviters.map(i => `${bot.sleet.formatUser(i.inviter)} {\`${i.code}\`} <\`${i.uses}\`>`).join(', ')
   }
 }
 
@@ -257,22 +307,24 @@ module.exports.events.guildMemberRemove = async (bot, member) => {
       (await member.guild.fetchAuditLogs({type: 'MEMBER_KICK', limit: 1})) :
       (await member.guild.fetchAuditLogs({type: 'MEMBER_KICK', limit: 1, after}))).entries.first()
 
-    if (latestKick && (latestKick.target.id !== member.user.id || latestKick.id === after)) {
+    if (latestKick && (latestKick.target.id !== member.id || latestKick.id === after)) {
       latestKick = null
     }
 
     lastKicks.set(member.guild.id, latestKick ? latestKick.id : undefined)
   }
 
+  if (member.user === undefined) member.user = await bot.fetchUser(member.id)
+
   const msg = `${bot.sleet.formatUser(member.user)} ${member}`
             + (latestKick ? ` kicked by ${bot.sleet.formatUser(latestKick.executor)} ${latestKick.reason ? 'for "' + latestKick.reason + '"': ''}` : '')
 
-  const roles = (config.settings.member_remove_roles ? member.roles.map(r => r.name).filter(r => r !== '@everyone').join(', ') : '')
+  const roles = (config.settings.member_remove_roles && member.roles ? member.roles.map(r => r.name).filter(r => r !== '@everyone').join(', ') : '')
   const embed = new Discord.RichEmbed()
 
   embed.setDescription(`**${member.guild.memberCount}** Members\n${roles ? '**Roles:** ' + roles : ''}`)
     .setColor(colors.memberRemove)
-    .setFooter(`Joined ${Time.trim(Time.since(member.joinedAt).format({short: true}), 3)} ago`)
+    .setFooter(`Joined ${member.joinedAt ? Time.trim(Time.since(member.joinedAt).format({short: true}), 3) : 'some unknown time'} ago`)
     .setTimestamp(new Date())
 
   sendLog(config.channel, latestKick ? ':boot:' : ':outbox_tray:', 'Member Remove', msg, {embed})
@@ -309,7 +361,6 @@ module.exports.events.guildBanAdd = async (bot, guild, user) => {
 
   embed.setDescription(`**${nBans}** Bans`)
     .setColor(colors.userBan)
-    .setTimestamp(new Date())
 
   sendLog(config.channel, ':hammer:', 'User Ban', msg, {embed})
 }
@@ -353,8 +404,9 @@ module.exports.events.guildBanRemove = async (bot, guild, user) => {
 module.exports.events.userUpdate = async (bot, oldUser, newUser) => {
   let msgUser, msgAvy, msgBoth
 
-  if (oldUser.tag !== newUser.tag)
-    msgUser = msgBoth = `${bot.sleet.formatUser(oldUser)} => ${bot.sleet.formatUser(newUser, false)}`
+  if (oldUser.tag !== newUser.tag) {
+    msgUser = msgBoth = `${bot.sleet.formatUser(oldUser)} => ${bot.sleet.formatUser(newUser, {id: false})}`
+  }
 
   if (oldUser.avatarURL !== newUser.avatarURL) {
     msgAvy = `${bot.sleet.formatUser(newUser)} => <${newUser.avatarURL}>`
@@ -381,6 +433,9 @@ module.exports.events.userUpdate = async (bot, oldUser, newUser) => {
   }
 }
 
+const FILENAME = 'archive.dlog.txt'
+const generateArchiveUrl = (channelId, attachmentId) => `${archiveViewer}${channelId}-${attachmentId}`
+
 module.exports.events.messageDeleteBulk = async (bot, messages) => {
   const firstMsg = messages.first()
   const guild = firstMsg.guild
@@ -399,20 +454,46 @@ module.exports.events.messageDeleteBulk = async (bot, messages) => {
     messagesPerUser.set(msg.author.id, newCount)
   }
 
-  const userList = Array.from(users).map(u => bot.sleet.formatUser(u, false) + `\`[${messagesPerUser.get(u.id)}]\``).join(', ').substring(0, 200)
-  const filename = `${firstMsg.channel.name}.dlog.txt`
-  const gist = await bot.sleet.createGist(txt, {filename})
-  const msg = `${firstMsg.channel}, **${messages.size}** messages\n${userList}\n<${archiveViewer}${gist.body.id}>`
+  const userList = Array.from(users).map(u => bot.sleet.formatUser(u, false) + ` \`[${messagesPerUser.get(u.id)}]\``).join(', ').substring(0, 1500)
+  const msg = `${firstMsg.channel}, **${messages.size}** messages\n${userList}`
+  const files = [{ name: FILENAME, attachment: Buffer.from(txt, 'utf8') }]
+  const sent = await sendLog(config.channel, ':fire:', 'Channel Purged', msg, { files })
+  const attach = sent.attachments.first().id
+  sent.edit(`${sent.content}\n<${generateArchiveUrl(sent.channel.id, attach)}>`)
+}
 
-  sendLog(config.channel, ':bomb:', 'Channel Purged', msg)
+class RollingStore {
+  constructor(max) {
+    this.max = max
+    this.array = []
+  }
+
+  add(e) {
+    this.array.push(e)
+    return this.array = this.array.slice(0, this.max)
+  }
+
+  has(e) {
+    return this.array.includes(e)
+  }
 }
 
 const lastDeleteEntry = new Map()
+const deletedStore = new RollingStore(50)
 module.exports.events.messageDelete = async (bot, message) => {
+  if (!message.guild) return
   const config = getConfig(message.guild)
   if (!config || !config.settings.message_delete) return
 
-  const delLog = message.edits.reverse().map(m => messageToLog(m, {username: false, id: false})).join('\n')
+  // Check the raw event handler above
+  if (message.uncached) {
+    if (deletedStore.has(message.id)) return;
+    const msg = `Uncached message (${message.id}) in ${message.channel}`
+    sendLog(config.channel, ':wastebasket:', 'Message Deleted', msg)
+    return
+  }
+
+  deletedStore.add(message.id)
   const after = lastDeleteEntry.get(message.guild.id)
   let executor, reason
 
@@ -429,27 +510,75 @@ module.exports.events.messageDelete = async (bot, message) => {
       lastDeleteEntry.set(message.guild.id, lastDel.id)
   }
 
-
+  const delLog = message.edits.reverse().map((m, i) => messageToLog(m, {username: false, id: false, includeAttach: i === 0})).join('\n')
+  const attachProxy = message.attachments.array().map(a => a.url.replace('https://cdn.discordapp.com', '<https://media.discordapp.net') + '>')
   const msg = `(${message.id}) from ${bot.sleet.formatUser(message.author)} in ${message.channel}`
           + (executor ? ` by ${bot.sleet.formatUser(executor)}` : '')
           + (reason ? ` for "${reason}"` : '')
           + (message.edits.length > 1 ? `, **${message.edits.length}** revisions` : '')
           + '\n'
+          + (attachProxy.length > 0 ? `Attachment Proxies: ${attachProxy.join(', ')}\n` : '')
           + '```\n' + delLog.replace(/(`{3})/g, '`\u{200B}'.repeat(3)).substring(0, 1500) + '\n```'
 
   sendLog(config.channel, ':wastebasket:', 'Message Deleted', msg)
 }
 
-function messageToLog(message, {username = true, id = true} = {}) {
+const HAMMER = '\ud83d\udd28' // 🔨
+const BOOT = '\ud83d\udc62' // 👢
+const INFO = '\u2139\ufe0f' // ℹ️
+const MENTION = '\ud83d\udcdd' // 📝
+const userIdRegex = /(?:.*(?:from).*?|.*)\((\d+)\).*$/m
+
+module.exports.events.messageReactionAdd = (bot, react, user) => {
+  if (!react.message.guild) return
+  const config = getConfig(react.message.guild)
+  if (!config || !config.settings.reaction_actions) return
+  if (react.message.author.id !== bot.user.id || react.message.channel.id !== config.channel.id) return
+
+  const [,id] = (userIdRegex.exec(react.message.content) || [,null])
+
+  if (id === null) return
+
+  const message = react.message
+
+  switch (react.emoji.name) {
+    case HAMMER:
+      message.guild.ban(id)
+        .then(m => message.channel.send(`Banned user <@${id}>`))
+        .catch(e => message.channel.send(`Failed to ban user ${id}:\n*${e}*`))
+      break
+
+    case BOOT:
+      message.guild.fetchMember(id).then(m => {
+        if (m.kickable) {
+          m.kick().then(e => message.channel.send(`Kicked user <@${id}>`)).catch(() => {})
+        } else {
+          message.channel.send('Failed to kick user, insufficient permissions')
+        }
+      })
+      .catch(e => message.channel.send('Failed to fetch user to kick them'))
+      break
+
+    case INFO:
+      message.channel.send(id)
+      break
+
+    case MENTION:
+      message.channel.send(`<@${id}>`)
+      break
+  }
+}
+
+function messageToLog(message, {username = true, id = true, includeAttach = true} = {}) {
   return `[${curTime(message.editedAt || message.createdAt)}]` +
            (id ? '(' + message.id + ') ' : '') +
            `${username ? message.author.tag + ' :' : ''} ${message.content}` +
-           `${(message.attachments.first() !== undefined) ? ' | Attach: ' + message.attachments.array().map(a => a.url).join(', ') : ''}`
+           `${(includeAttach && message.attachments.first() !== undefined) ? ' | Attach: ' + message.attachments.array().map(a => a.url).join(', ') : ''}`
 }
 
 function curTime(date) {
-  date = date || new Date()
-  return `${padLeft(date.getMonth()+1,2,0)}/${padLeft(date.getDate(),2,0)} ${padLeft(date.getHours(),2,0)}:${padLeft(date.getMinutes(),2,0)}`
+  const d = date || new Date()
+  return padExpressions`${d.getUTCHours()}:${d.getUTCMinutes()}:${d.getUTCSeconds()}`
 }
 
 function padLeft(msg, pad, padChar = '0') {

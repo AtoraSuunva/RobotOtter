@@ -16,7 +16,7 @@ const timeStr = (time, mod, str, short, post = ', ') => (!short ?
 const Time = {
   since(date) {
     return {
-      millis: Date.now() - date,
+      get millis () { return Date.now() - date },
       get seconds() { return Math.floor(this.millis / MS_SEC  )},
       get minutes() { return Math.floor(this.millis / MS_MIN  )},
       get hours  () { return Math.floor(this.millis / MS_HOUR )},
