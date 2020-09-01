@@ -8,18 +8,20 @@ module.exports.config = {
   invisible: true
 }
 
-const statuses = ['with boorus!', '{streaming} christian anime!', 'send nudes', '{streaming} some lewd stuff',
-                  'Gla-ahn~', '{streaming} handholding~', '{streaming} pawholding', '{streaming} some furry stuff',
-                  'alone', 'with Atlas!', 'with RobotOtter!', 'with BulbaTrivia!', 'with Haram-- wait he\'s dead',
-                  'probably something lewd', 'aaa', 'with shit code.', '{streaming} the entire bee movie, but r34',
-                  '{streaming} memes.', '{streaming} Atlas Dying.', 'Japanese Anime Schoolgirl Sim', 'nya', 'as a flareon',
+const statuses = ['with rocks!', '{streaming} a stream!', 'send nudes', '{streaming} otter power!',
+                  '*chirp*', '*purr*', '*squeal*', '*gurgling*', '{streaming} pawholding~!', '{streaming} some motterating',
+                  'alone', 'with Atlas!', 'with Smol Bot!', 'with BulbaTrivia!', 'with Haram-- wait he\'s dead', 'with Dito!',
+                  'probably something lewd', 'aaa', 'with shit code.', '{streaming} the entire bee movie', 'with clams!',
+                  'otters are adorable', '{streaming} memes.', '{streaming} Atlas Dying.', 'Lich Quest!', 'Avy by Hannahchomp, thanks!',
                   '{streaming} Jolt hugs!', '{streaming} the Twitch logout page.', '{streaming} Playing', 'Streaming', 'send dudes',
-                  '{streaming} Atlas crying while debugging', '{watching} atlas cry', '{watching} the eevees!', '{listening} the screams of the damned',
-                  '{watching} probably something lewd', '{watching} RobotOtter and Bulba fight', '{listening} the moans of the damned', 'kobold',
-                  '{watching} girls.. , .,', '{watching} for big tiddy dragon gf', '{watching} for big tiddy shark gf', 'funny joke']
+                  '{streaming} Atlas crying while debugging', '*otter noises*', 'as an Ottermancer', 'as a Seal', 'as a Chicken',
+                  'rip lich quest', 'in Otter Space', 'hjkasd otters are adorable', 'Otters, Dungeons & Dragons', 'in the snow!',
+                  '{listening} a calming stream', '{watching} a fight between Smol and Bulba', '{watching} the fishies',
+                  '{watching} chat', '{listening} a waterfall', '{watching} maymays', 'with other otters :3c',
+                  '{listening} the start of the robo-revolution', '{watching} ass']
 
 //strings starting with '{streaming}' will be shown as "Streaming X"
-const appendMsg = ' | s!help' //use this to keep a constant message after
+const appendMsg = ' | r?help' //use this to keep a constant message after
 const interval = 60 * 15 //in seconds
 const twitch = 'https:\/\/twitch.tv/logout' //memes
 let interv
