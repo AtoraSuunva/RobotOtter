@@ -7,24 +7,27 @@ module.exports.config = {
   invokers: ['info'],
   help: 'Find out about the bot!',
   expandedHelp: 'Get some ~~dirt~~ info about this bot.',
-  usage: ['Get info', 'info']
+  usage: ['info', 'info']
 }
 
 module.exports.events = {}
 module.exports.events.message = (bot, message) => {
   getCPUUsage().then(cpu => {
+    const totalMem = os.totalmem()
+    const freeMem = os.freemem()
+
     let fields = new Map()
-    .set('Links:'   , '[Github](https://github.com/AtlasTheBot/RobotOtter-Discord)\nBot Invite/Sever: `r?invite`')
+    .set('Links:'   , 'this bot is pirate')
     .set('Owner:'   , `${bot.sleet.config.owner.username}#${bot.sleet.config.owner.discriminator}`)
     .set('Using:'   , `Node ${process.version}\ndiscord.js v${require('discord.js').version}`)
     .set('CPU:'     , `${(100 - (cpu * 100)).toFixed(2)}%`)
-    .set('RAM:'     , `${formatBytes(os.totalmem() - os.freemem(), 1)}/${formatBytes(os.totalmem(), 1)} - ${((os.totalmem() - os.freemem()) / os.totalmem()*100).toFixed(2)}%`)
+    .set('RAM:'     , `Me: ${formatBytes(process.memoryUsage().rss, 1)}\n${formatBytes(totalMem - freeMem, 1)}/${formatBytes(totalMem, 1)} - ${((totalMem - freeMem) / totalMem * 100).toFixed(2)}%`)
 
-    if (message.guild !== null && message.channel.permissionsFor(message.client.user).hasPermission('EMBED_LINKS')) {
+    if (message.guild !== null && message.channel.permissionsFor(message.client.user).has('EMBED_LINKS')) {
       let Discord = require('discord.js')
       let embed = new Discord.RichEmbed()
         .setAuthor(bot.user.username, bot.user.avatarURL)
-        .setFooter('Use b!stats for stats!')
+        .setFooter('Use s?stats for stats!')
 
       for(let [title, val] of fields) {
         embed.addField(title, val, true)

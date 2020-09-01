@@ -5,7 +5,6 @@ module.exports.config = {
   invokers: ['hello', 'h'],
   help: 'Says hi!',
   expandedHelp: 'It says hi. That\'s it. I wish it did my taxes though.',
-  usage: ['Say hi', 'hello'],
   invisible: true
 }
 

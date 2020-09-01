@@ -97,5 +97,6 @@ serverSettings.json
 *.js~*
 *.json~*
 yarn.lock
-modules/secret/*
+src/modules/secret/*
 config.json
+ecosystem.config.js

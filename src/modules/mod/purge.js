@@ -37,7 +37,7 @@ module.exports.events.message = async (bot, message) => {
     case 'emojis':
     case 'emote':
     case 'emotes':
-      toPurge = toPurge.filter(m => m.content.match(/<:\w+:\d+>/) || hasEmoji(m.content))
+      toPurge = toPurge.filter(m => m.content.match(/<a?:\w+:\d+>/) || hasEmoji(m.content))
     break
 
     case 'embed':
