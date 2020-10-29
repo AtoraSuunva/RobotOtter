@@ -11,7 +11,11 @@ const BIN = '\u{d83d}\u{ddd1}\u{fe0f}'
 
 module.exports.events = {}
 module.exports.events.message = async (bot, message) => {
-  if (!message.guild || !message.channel.permissionsFor(message.member).has('MANAGE_MESSAGES')) return
+  if (
+    !message.guild
+    || !message.channel.permissionsFor(message.member)
+    || !message.channel.permissionsFor(message.member).has('MANAGE_MESSAGES')
+  ) return
 
   if (!message.channel.permissionsFor(message.guild.me).has('MANAGE_MESSAGES')) return message.channel.send("I can't manage messages.")
 
