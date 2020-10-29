@@ -11,7 +11,8 @@ module.exports.config = {
 
 const invokers = module.exports.config.invokers
 const roleNames = ['roleban', 'rolebanned', 'tossed', 'muted', 'foreboden', 'silenced']
-const roleIds   = []
+const roleIds   = ['122150407806910464', '303723450747322388', '367873664118685697', '382658296504385537']
+// r/ut, atlas yt, perfect, ut rp
 const mentionRegex = /<@!?[0-9]+>/
 
 async function fetchLogChannel(db, guild_id) {
@@ -58,7 +59,7 @@ module.exports.events.message = async (bot, message) => {
   if (message.member.highestRole.position <= rbRole.position)
     return message.channel.send('Your highest role needs to higher than the `' + rbRole.name + '` role to (un)roleban.')
 
-  const members = await bot.sleet.extractMembers(message.content, message, { invokers })
+  const members = await bot.sleet.extractMembers(message, { invokers })
 
   if (members.every(m => m === null))
     return message.channel.send('I got nobody to (un)roleban.')
