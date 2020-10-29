@@ -7,7 +7,6 @@ const escapeMarkdown = Discord.Util.escapeMarkdown
 const fs = require('fs')
 const path = require('path')
 const Logger = require('./Logger.js')
-const snek = require('snekfetch')
 const recurReadSync = require('recursive-readdir-sync') //to read all files in a directory, including subdirectories
 //this allows you to sort modules into directories
 
@@ -328,10 +327,13 @@ const uReg = {
   id: /(\d+)/,
 }
 
-async function extractMembers(str, source, {id = false, keepIds = false, invokers = [], noCmd = false} = {}) {
+async function extractMembers(content, { id = false, keepIds = false, invokers = [], hasCommand = true } = {}) {
   let guild
   let message
   let channel
+
+  const source = content.source ? content.source : content
+  const str = content.from ? content.from : content.content
 
   if (source instanceof Discord.Guild)
     guild = source
@@ -342,13 +344,16 @@ async function extractMembers(str, source, {id = false, keepIds = false, invoker
   else
     throw new Error('`source` must be one of [Guild, Message, Channel]')
 
+  if (!str)
+    throw new Error('There was no content to extract members from (Did you pass a guild or channel?)')
+
   const shlexed = shlex(str, { invokers })
   let arr
 
-  if (noCmd) {
-    arr = shlexed
-  } else {
+  if (content instanceof Discord.Message && hasCommand) {
     [cmd, ...arr] = shlexed
+  } else {
+    arr = shlexed
   }
 
   const users = []
@@ -692,28 +697,6 @@ function writeFile(fileName, fileContent) {
     })
   })
 }
-
-/**
- * Create a gist
- * @param  {Object}    files       The files to add, in format of {"filename.txt": {content: "words"}}
- * @param  {String=''} filename    An optional param to specify the filename, if specified "files" is interpreted as the text to upload
- * @param  {String=''} description An optional description for the gist
- * @return {Promise} GitHub's response
- */
-function createGist(files, {filename = '', description = ''} = {}) {
-  if (filename) {
-    files = {[filename]: {content: files}}
-  }
-
-  return snek.post('https://api.github.com/gists', {
-    headers: {
-      'User-Agent': `${bot.user.username} Bot by ${config.owner.username} on Discord`,
-      'Authorization': `token ${process.env.GITHUB_TOKEN}`
-    },
-    data: {files, description}
-  })
-}
-module.exports.createGist = createGist
 
 /**
  * Formats a user like `**username**#discrim`

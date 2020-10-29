@@ -1,6 +1,7 @@
+const invokers = ['ban', 'xban', 'begone', 'omae wa mou shindeiru', 'vore', 'yeet', 'snap', 'brazil']
 module.exports.config = {
   name: 'ban',
-  invokers: ['ban', 'xban', 'begone', 'omae wa mou shindeiru', 'vore', 'yeet', 'snap', 'brazil'],
+  invokers,
   help: 'Bans people',
   expandedHelp: 'does the bann',
   usage: ['Ban someone', 'ban [@user]', 'Ban another person', 'ban [user id]', 'Ban, but with reason', 'ban @user u suck']
@@ -22,10 +23,10 @@ module.exports.events.message = async (bot, message) => {
   if (!message.member.permissions.has('BAN_MEMBERS'))
     return message.channel.send('You do not have ban permissions.')
 
-  let [cmd, user, ...reason] = bot.sleet.shlex(message, {invokers: module.exports.config.invokers})
+  let [cmd, user, ...reason] = bot.sleet.shlex(message, { invokers })
   reason = reason.join(' ')
 
-  user = (await bot.sleet.extractMembers(user, message, { keepIds: true, noCmd: true }))[0]
+  user = (await bot.sleet.extractMembers({ from: user, source: message }, { keepIds: true }))[0]
 
   if (!user)
     return message.channel.send('So, who do you want to ban?')
@@ -47,6 +48,11 @@ module.exports.events.message = async (bot, message) => {
 
   if ((await message.guild.fetchBans()).get(id))
     return message.channel.send('That user is already banned.')
+
+  if (message.guild.id === '211956704798048256') {
+    if (cmd.toLowerCase() === 'yeet' && (!reason || reason.split(/dab/i).length < 5))
+      return message.channel.send('You did not dab on them enough.')
+  }
 
   message.guild.ban(id, {reason: (reason ? reason + ' ' : '') + `[Ban by ${bot.sleet.formatUser(message.author)}]`})
     .then(async u => {

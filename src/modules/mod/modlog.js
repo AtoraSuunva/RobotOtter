@@ -151,7 +151,7 @@ module.exports.events.raw = async (bot, packet) => {
     case 'GUILD_MEMBER_REMOVE':
       guild = bot.guilds.get(packet.d.guild_id)
 
-      if (guild.members.get(packet.d.user.id)) return
+      if (!guild || guild.members.get(packet.d.user.id)) return
 
       member = packet.d.user
       member.guild = guild
