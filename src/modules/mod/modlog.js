@@ -1,9 +1,8 @@
 module.exports.config = {
   name: 'modlog',
   invokers: ['modlog'],
-  help: 'Modlogging-power thing. Log stuff that happens',
-  expandedHelp: 'WIP',
-  invisible: true
+  help: 'Log stuff that happens',
+  expandedHelp: 'Config via channel topics, see `modlog` and `modlog help`',
 }
 
 const Discord = require('discord.js')
@@ -151,7 +150,7 @@ module.exports.events.raw = async (bot, packet) => {
     case 'GUILD_MEMBER_REMOVE':
       guild = bot.guilds.get(packet.d.guild_id)
 
-      if (!guild || guild.members.get(packet.d.user.id)) return
+      if (guild.members.get(packet.d.user.id)) return
 
       member = packet.d.user
       member.guild = guild
@@ -159,6 +158,8 @@ module.exports.events.raw = async (bot, packet) => {
       break
 
     case 'MESSAGE_DELETE':
+      // ignore for now
+      return;
       if (!packet.d.guild_id) return
       channel = bot.channels.get(packet.d.channel_id)
 
@@ -263,8 +264,7 @@ module.exports.events.guildMemberAdd = async (bot, member) => {
   const inviter = (config.settings.member_add_invite ? (await getInviter(bot, member.guild)) : null)
   const invMem = (inviter ? '| :mailbox_with_mail: ' + inviter : '')
 
-  embed.setDescription(`${config.settings.member_add_mention ? '' : member + ' | '}
-**${member.guild.memberCount}** Members ${invMem} ${newAcc}`)
+  embed.setDescription(`${config.settings.member_add_mention ? '' : member + ' | '}**${member.guild.memberCount.toLocaleString()}** Members ${invMem} ${newAcc}`)
     .setColor(colors.memberAdd)
     .setFooter(`${Time.trim(Time.since(member.user.createdAt).format({short: true}), 3)} old`, member.user.avatarURL)
     .setTimestamp(new Date())
@@ -316,13 +316,13 @@ module.exports.events.guildMemberRemove = async (bot, member) => {
 
   if (member.user === undefined) member.user = await bot.fetchUser(member.id)
 
-  const msg = `${bot.sleet.formatUser(member.user)} ${member}`
+  const msg = `${bot.sleet.formatUser(member.user)} <@${member.id}>`
             + (latestKick ? ` kicked by ${bot.sleet.formatUser(latestKick.executor)} ${latestKick.reason ? 'for "' + latestKick.reason + '"': ''}` : '')
 
   const roles = (config.settings.member_remove_roles && member.roles ? member.roles.map(r => r.name).filter(r => r !== '@everyone').join(', ') : '')
   const embed = new Discord.RichEmbed()
 
-  embed.setDescription(`**${member.guild.memberCount}** Members\n${roles ? '**Roles:** ' + roles : ''}`)
+  embed.setDescription(`**${member.guild.memberCount.toLocaleString()}** Members\n${roles ? '**Roles:** ' + roles : ''}`)
     .setColor(colors.memberRemove)
     .setFooter(`Joined ${member.joinedAt ? Time.trim(Time.since(member.joinedAt).format({short: true}), 3) : 'some unknown time'} ago`)
     .setTimestamp(new Date())
