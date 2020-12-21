@@ -6,7 +6,7 @@ module.exports.config = {
   usage: ['Get results', 'strawpoll 1234']
 }
 
-const snek = require('snekfetch')
+const fetch = require('node-fetch')
 const endOfLine = require('os').EOL
 
 module.exports.events = {}
@@ -24,14 +24,12 @@ module.exports.events.message = (bot, message) => {
     'User-Agent': 'Strawpoll for Terminal (By AtlasTheBot)'
   }
 
-  snek.get(url, {headers}).then(response => {
-    if (response.statusCode == 200) {
-      message.channel.send(sortVotes(response.body))
+  fetch(url, { headers }).then(async response => {
+    if (response.status === 200) {
+      message.channel.send(sortVotes(await response.json()))
+    } else if (response.status === 404) {
+      message.channel.send('There\'s no strawpoll for that ID.')
     } else {
-      if (response.statusCode == 404)
-        return message.channel.send('There\'s no strawpoll for that ID.')
-
-      bot.sleet.logger.error(response)
       message.channel.send('Something went wrong while trying to get that poll...')
     }
   })
