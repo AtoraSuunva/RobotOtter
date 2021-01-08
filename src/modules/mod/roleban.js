@@ -218,16 +218,19 @@ module.exports.events.guildMemberUpdate = async (bot, oldM, newM) => {
     return
   }
 
-  const auditLogs = (await oldM.guild.fetchAuditLogs({limit: 1, type: 'MEMBER_ROLE_UPDATE'})).entries
-  let executor = 'someone unknown!'
+  let executor = 'someone unknown'
 
-  if (auditLogs.first()) {
-    const e = auditLogs.first()
-    if (e.target.id === oldM.id && e.changes[0] && e.changes[0].key === '$remove' && e.changes[0]['new'].length === 1 && e.changes[0]['new'][0].id === rbRole.id) {
-      executor = e.executor
-    } else {
-      // just give up apparantly there's a bug with this
-      return
+  if (oldM.guild.me.hasPermission('VIEW_AUDIT_LOG')) {
+    const auditLogs = (await oldM.guild.fetchAuditLogs({limit: 1, type: 'MEMBER_ROLE_UPDATE'})).entries
+
+    if (auditLogs.first()) {
+      const e = auditLogs.first()
+      if (e.target.id === oldM.id && e.changes[0] && e.changes[0].key === '$remove' && e.changes[0]['new'].length === 1 && e.changes[0]['new'][0].id === rbRole.id) {
+        executor = e.executor
+      } else {
+        // just give up apparantly there's a bug with this
+        return
+      }
     }
   }
 
