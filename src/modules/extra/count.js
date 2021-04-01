@@ -3,11 +3,18 @@ module.exports.config = {
   name: 'count',
   invokers: ['count'],
   help: 'Counts words',
-  expandedHelp: 'it just counts words',
-  usage: ['Count words', 'count <some text to count here>']
+  expandedHelp: 'b!count some text to count',
 }
 
 module.exports.events = {}
 module.exports.events.message = (bot, message) => {
-  message.channel.send(message.content.trim().replace(/\s+/gi, ' ').split(' ').filter(w=>w!=='').length-1)
+  const [cmd, ...w] = bot.sleet.shlex(message)
+  message.channel.send(
+    w
+      .join(' ')
+      .trim()
+      .replace(/\s+/gi, ' ')
+      .split(' ')
+      .filter(w => w !== '').length,
+  )
 }

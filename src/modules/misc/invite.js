@@ -9,6 +9,5 @@ module.exports.config = {
 module.exports.events = {}
 
 module.exports.events.message = (bot, message) => {
-  bot.generateInvite()
-    .then(i => message.channel.send(`Invite me! <${i}>`))
+  bot.generateInvite().then(i => message.channel.send(`Invite me! <${i}>`))
 }
