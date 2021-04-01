@@ -22,10 +22,10 @@
   "dependencies": {
     "bufferutil": "^4.0.3",
     "convert-units": "^2.3.4",
-    "discord.js": "^11.5.1",
+    "discord.js": "^12.5.2",
     "erlpack": "github:discord/erlpack",
     "node-fetch": "^2.6.1",
-    "pg-promise": "^10.8.7",
+    "pg-promise": "^10.9.5",
     "pmx": "^1.6.7",
     "recursive-readdir-sync": "^1.0.6",
     "utf-8-validate": "^5.0.4",

@@ -1,0 +1,25 @@
+{
+  "owner": {
+    "id": "74768773940256768",
+    "username": "Atlas",
+    "discriminator": "2564",
+    "avatar": "6abbdd1ba2a2dbcf3a6043afa8dba1cc"
+  },
+  "moduleDir": "modules",
+  "invokers": [
+    "r?",
+    "otter",
+    "r!",
+    "hey otter"
+  ],
+  "botbans": [],
+  "debug": true,
+  "invoker": [
+    "GUILDS",
+    "GUILD_MEMBERS",
+    "GUILD_BANS",
+    "GUILD_MESSAGES",
+    "GUILD_MESSAGE_REACTIONS",
+    "DIRECT_MESSAGES"
+  ]
+}
