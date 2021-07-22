@@ -193,7 +193,7 @@ async function roleban(bot, message, members, rbRole, options = {}) {
         }
 
         if (logToChannel) {
-          m.guild.channels
+          m.guild.channels.cache
             .get(logChannelId)
             .send(baseMsg + chanMsg + '\n' + rolesMsg)
         }
@@ -263,7 +263,7 @@ async function unroleban(bot, message, members, rbRole, executor = null) {
         }
 
         if (logToChannel) {
-          m.guild.channels
+          m.guild.channels.cache
             .get(logChannelId)
             .send(baseMsg + chanMsg + '\n' + rolesMsg)
         }
@@ -285,7 +285,7 @@ async function unroleban(bot, message, members, rbRole, executor = null) {
           ? message
             ? message.channel
             : null
-          : m.guild.channels.get(logChannelId)
+          : m.guild.channels.cache.get(logChannelId)
 
         if (!destination || !message) {
           return bot.sleet.logger.error(e)
