@@ -24,7 +24,7 @@
     "convert-units": "^2.3.4",
     "discord.js": "^12.5.2",
     "erlpack": "github:discord/erlpack",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.6.7",
     "pg-promise": "^10.9.5",
     "pmx": "^1.6.7",
     "recursive-readdir-sync": "^1.0.6",
