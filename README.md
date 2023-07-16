@@ -1,3 +1,9 @@
+# ARCHIVED!!!
+
+This repo is kept around for historical and "redirecting people" purposes. **The actual bot isn't going down,** instead all development work will be done at https://github.com/AtoraSuunva/smolbot. Smol Bot is a "private util bot" that turned spiritual successor to RobotOtter, and is now replacing RobotOtter's ancient (and now-broken) codebase. RobotOtter will remain public and freely available, but run off Smol Bot's codebase instead. Redirect all your issues/complaints/requests/etc to that repo instead.
+
+---
+
 # RobotOtter
 Discord bot for stuff like flipping dice & rollig coins.
 
